@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: ttb-label-verifier
+    runtime: node
+    plan: starter
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: OPENROUTER_SITE_URL
+        sync: false
+      - key: OPENROUTER_APP_NAME
+        value: TTB Label Verifier
+      - key: MODEL_ID
+        value: anthropic/claude-haiku-4.5
+      - key: DATA_DIR
+        value: /var/data
+      - key: BATCH_CONCURRENCY
+        value: "4"
+      - key: BATCH_RETENTION_HOURS
+        value: "24"
+      - key: DRAFT_RETENTION_HOURS
+        value: "2"
+    disk:
+      name: ttb-label-data
+      mountPath: /var/data
+      sizeGB: 1
