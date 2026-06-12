@@ -327,3 +327,76 @@ a:focus-visible {
     min-height: 230px;
   }
 }
+
+.harness-shell {
+  width: min(100% - 32px, 960px);
+  margin: 0 auto;
+  padding: 64px 0;
+}
+
+.harness-shell h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.verdict-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.verdict-card {
+  border: 1px solid var(--line);
+  border-left-width: 5px;
+  border-radius: 8px;
+  background: white;
+  padding: 20px;
+}
+
+.verdict-card strong,
+.verdict-card span {
+  display: block;
+}
+
+.verdict-card strong {
+  text-transform: capitalize;
+}
+
+.verdict-card span {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.verdict-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.verdict-card small {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.verdict-match {
+  border-left-color: #27835b;
+}
+
+.verdict-needs-review {
+  border-left-color: #cf8a17;
+}
+
+.verdict-mismatch {
+  border-left-color: #bd3d3d;
+}
+
+.verdict-not-applicable {
+  border-left-color: #7b8495;
+}
