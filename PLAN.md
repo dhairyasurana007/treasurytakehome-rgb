@@ -75,20 +75,20 @@ Derived from README stakeholder interviews and TTB label requirements:
 ### Outside This Product's Identity
 - Production FedRAMP / FISMA compliance
 - PII handling and federal data retention policy
-- Local/offline OCR fallback for air-gapped deployments (Marcus's firewall concern; the one required outbound dependency — `api.anthropic.com:443` — should be documented in the README, not worked around in code for this prototype)
+- Local/offline OCR fallback for air-gapped deployments (Marcus's firewall concern; the required outbound dependency — `openrouter.ai:443` — should be documented in `MVP-README.md` and `PROJECT-README.md`, not worked around in code for this prototype)
 
 ---
 
 ## Key Technical Decisions
 
 **1. Next.js (App Router) deployed to Render as a persistent web service**
-Single repository, single deployable. API routes handle the Claude API call server-side (keeping the API key off the client). Render's web service tier runs Next.js as a persistent Node process — no serverless cold-start or timeout constraints. Chosen over a decoupled SPA + API because the prototype has no reason to split surfaces.
+Single repository, single deployable. API routes call OpenRouter server-side (keeping the API key off the client). Render's web service tier runs Next.js as a persistent Node process — no serverless cold-start or timeout constraints. Chosen over a decoupled SPA + API because the prototype has no reason to split surfaces.
 
-**2. Claude Haiku (`claude-haiku-4-5-20251001`) for vision extraction**
-Haiku processes a typical label image in 1–2 seconds. That headroom supports the ≤5s interactive single-label requirement. Sonnet improves accuracy on degraded images but adds 2–4s latency and ~5× cost; Haiku is the right default. The model is swappable via `MODEL_ID` environment variable with no code change.
+**2. OpenRouter with Claude Haiku (`anthropic/claude-haiku-4.5`) for vision extraction**
+The application uses OpenRouter's OpenAI-compatible API at `https://openrouter.ai/api/v1`, with Claude Haiku as the default vision model. Haiku's expected latency provides headroom for the ≤5s interactive single-label requirement. The model is swappable via the `MODEL_ID` environment variable with no code change. Any OpenRouter provider-routing or fallback policy must be explicit, documented, and tested so model behavior does not change silently.
 
 **3. Structured extraction + deterministic comparison in code**
-The Claude call extracts fields into a typed JSON schema via tool use. Comparison logic is pure TypeScript — not a second LLM call. This keeps comparison fast (<1ms), deterministic, explainable, and independently testable. The LLM's job is OCR + field parsing; the code's job is issuing verdicts.
+The OpenRouter model call extracts fields into a typed JSON schema through the OpenAI-compatible tools/structured-output interface. Comparison logic is pure TypeScript — not a second LLM call. This keeps comparison fast (<1ms), deterministic, explainable, and independently testable. The model's job is OCR + field parsing; the code's job is issuing verdicts.
 
 Comparison uses explicit field-specific rules, not a generic similarity score. Canonically equivalent values can match, clearly different values mismatch, and ambiguous brand, class/type, or bottler/address comparisons become `needs-review` for human judgment.
 
@@ -138,7 +138,7 @@ At the exact job expiry, uploaded images, stored results, and job metadata are d
 ## System-Wide Impact
 
 - **Compliance agents** (primary users): Sarah, Dave, Jenny and their colleagues. UI must accommodate low-to-moderate tech comfort; generous labeling, large click targets, plain English throughout.
-- **IT / Marcus**: Render hosting, single outbound dependency (`api.anthropic.com:443`). The README must document this firewall requirement explicitly so any future production pilot doesn't fail the way the scanning vendor pilot did.
+- **IT / Marcus**: Render hosting, single outbound dependency (`openrouter.ai:443`). `MVP-README.md` and `PROJECT-README.md` must document this firewall requirement explicitly so any future production pilot doesn't fail the way the scanning vendor pilot did.
 - **No shared infrastructure changes** — standalone prototype with no COLA integration.
 
 ---
@@ -152,13 +152,13 @@ sequenceDiagram
     participant Agent as Compliance Agent
     participant UI as Next.js Frontend
     participant API as /api/verify (Server Route)
-    participant Claude as Claude Haiku Vision
+    participant Router as OpenRouter Vision API
     participant Cmp as Comparison Engine
 
     Agent->>UI: Upload label image + enter application data
     UI->>API: POST multipart/form-data (image + applicationData JSON)
-    API->>Claude: Base64 image + extraction prompt + JSON tool schema
-    Claude-->>API: Extracted fields (structured JSON via tool_use)
+    API->>Router: Base64 image + extraction prompt + JSON tool schema
+    Router-->>API: Extracted fields (structured JSON)
     API->>Cmp: extracted fields + application data
     Cmp-->>API: Per-field verdicts
     API-->>UI: VerificationResult JSON
@@ -245,7 +245,7 @@ tsconfig.json
 
 ### U1. Project Scaffold and Configuration
 
-**Goal:** Establish a working Next.js App Router project with TypeScript, Tailwind CSS, Anthropic SDK dependency, and Render deployment configuration.
+**Goal:** Establish a working Next.js App Router project with TypeScript, Tailwind CSS, OpenAI SDK configured for OpenRouter, and Render deployment configuration.
 
 **Requirements:** R8
 
@@ -262,7 +262,7 @@ tsconfig.json
 - `.env.example`
 - `lib/types.ts`
 
-**Approach:** Initialize with `create-next-app` using App Router + TypeScript + Tailwind. Install `@anthropic-ai/sdk`. `render.yaml` declares a web service: build command `npm install && npm run build`, start command `npm start`, `NODE_ENV=production`. `.env.example` documents `ANTHROPIC_API_KEY`, `MODEL_ID` (default `claude-haiku-4-5-20251001`), `DATA_DIR`, `BATCH_CONCURRENCY`, `BATCH_RETENTION_HOURS`, and `DRAFT_RETENTION_HOURS`. `lib/types.ts` defines shared type contracts: `ExtractedFields` (including `government_warning_prefix_bold`, `government_warning_legible`, and `government_warning_prominent` as `true | false | null`), `ApplicationData` (beverage type, values, and applicability map with government warning fixed true), `FieldVerdict` (`'match' | 'needs-review' | 'mismatch' | 'not-applicable'`), `VerificationResult` (map of field name to verdict + extracted/submitted values), and overall batch item status.
+**Approach:** Initialize with `create-next-app` using App Router + TypeScript + Tailwind. Install the `openai` package and configure it server-side with OpenRouter's base URL. `render.yaml` declares a web service: build command `npm install && npm run build`, start command `npm start`, `NODE_ENV=production`. `.env.example` documents `OPENROUTER_API_KEY`, `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`), optional `OPENROUTER_SITE_URL` and `OPENROUTER_APP_NAME` attribution values, `MODEL_ID` (default `anthropic/claude-haiku-4.5`), `DATA_DIR`, `BATCH_CONCURRENCY`, `BATCH_RETENTION_HOURS`, and `DRAFT_RETENTION_HOURS`. `lib/types.ts` defines shared type contracts: `ExtractedFields` (including `government_warning_prefix_bold`, `government_warning_legible`, and `government_warning_prominent` as `true | false | null`), `ApplicationData` (beverage type, values, and applicability map with government warning fixed true), `FieldVerdict` (`'match' | 'needs-review' | 'mismatch' | 'not-applicable'`), `VerificationResult` (map of field name to verdict + extracted/submitted values), and overall batch item status.
 
 **Test expectation:** none — pure scaffolding/config
 
@@ -320,9 +320,9 @@ tsconfig.json
 
 ---
 
-### U3. Claude Vision Extraction API Route
+### U3. OpenRouter Vision Extraction API Route
 
-**Goal:** Implement the `/api/verify` Next.js route that accepts a label image and returns a full `VerificationResult` via Claude Haiku vision extraction + comparison engine.
+**Goal:** Implement the `/api/verify` Next.js route that accepts a label image and returns a full `VerificationResult` via an OpenRouter-hosted vision model + comparison engine.
 
 **Requirements:** R1, R2, R5, R9
 
@@ -332,9 +332,9 @@ tsconfig.json
 - `app/api/verify/route.ts`
 - `lib/extract.ts`
 
-**Approach:** `route.ts` accepts `multipart/form-data` with `image` (File) and `applicationData` (JSON string). It validates that both are present, the uploaded bytes are at most 5 MB, the file signature identifies JPEG, PNG, or WebP, and dimensions do not exceed 25 megapixels; it does not trust the filename extension or supplied MIME type. It also validates beverage type/applicability input and rejects any attempt to mark the government warning inapplicable. Dimension inspection reads bounded metadata without fully decoding the image. Invalid input returns 400 with a user-readable message. `lib/extract.ts` calls the Anthropic SDK with the image as a base64-encoded vision message and uses the `tools` parameter with a typed JSON schema matching `ExtractedFields` to force structured output, including nullable booleans for whether the warning prefix is visibly bold and whether the full warning is legible and adequately prominent. Reads the `tool_use` content block from the response to get the parsed JSON. After extraction, calls `compareFields` from U2 and returns the full `VerificationResult`. Target: <4s for the Claude call, leaving 1s for parsing and comparison.
+**Approach:** `route.ts` accepts `multipart/form-data` with `image` (File) and `applicationData` (JSON string). It validates that both are present, the uploaded bytes are at most 5 MB, the file signature identifies JPEG, PNG, or WebP, and dimensions do not exceed 25 megapixels; it does not trust the filename extension or supplied MIME type. It also validates beverage type/applicability input and rejects any attempt to mark the government warning inapplicable. Dimension inspection reads bounded metadata without fully decoding the image. Invalid input returns 400 with a user-readable message. `lib/extract.ts` uses the OpenAI TypeScript SDK configured with `OPENROUTER_BASE_URL` and `OPENROUTER_API_KEY`. It sends the image as a base64 data URL in a multimodal request and uses the OpenAI-compatible tools/structured-output interface with a typed JSON schema matching `ExtractedFields`, including nullable booleans for whether the warning prefix is visibly bold and whether the full warning is legible and adequately prominent. The returned payload is runtime-validated before use. After extraction, the route calls `compareFields` from U2 and returns the full `VerificationResult`. Target: <4s for the OpenRouter call, leaving 1s for parsing and comparison.
 
-**Patterns to follow:** Anthropic SDK `tools` parameter with `input_schema` for structured output; `content[].type === 'tool_use'` to extract the payload.
+**Patterns to follow:** OpenAI SDK with OpenRouter `baseURL`; server-only bearer authentication; optional `HTTP-Referer` and `X-OpenRouter-Title` headers when attribution values are configured; OpenAI-compatible tool or structured output; runtime schema validation of model output.
 
 **Test scenarios:**
 - Valid JPEG of a label with all seven fields visible → all `ExtractedFields` non-null, `compareFields` called, `VerificationResult` returned
@@ -344,7 +344,7 @@ tsconfig.json
 - JPEG, PNG, and WebP signatures → accepted regardless of filename casing
 - HEIC, TIFF, or a renamed non-image file → API returns 400 with supported-format guidance
 - `applicationData` is malformed JSON → API returns 400
-- `ANTHROPIC_API_KEY` missing → API returns 500 with generic error (no credentials in response body)
+- `OPENROUTER_API_KEY` missing → API returns 500 with generic error (no credentials in response body)
 - Deployed route latency is measured end-to-end over a representative set of normal label images; record p50 and p95
 
 **Verification:** API returns a valid `VerificationResult` for a test image; local benchmarks are diagnostic only; deployed end-to-end p50 and p95 are recorded, with acceptance requiring p95 ≤5 seconds under normal load; error cases return appropriate HTTP status codes.
@@ -478,7 +478,7 @@ After successful creation, the UI displays a prominent copyable job URL and reco
 
 ### U6. Deployment to Render
 
-**Goal:** Deploy the Next.js app to Render as a public web service; update the README with complete setup, run, and deployment instructions.
+**Goal:** Deploy the Next.js app to Render as a public web service; add complete setup, run, and deployment instructions without modifying the source-of-truth `README.md`.
 
 **Requirements:** R8
 
@@ -486,21 +486,22 @@ After successful creation, the UI displays a prominent copyable job URL and reco
 
 **Files:**
 - `render.yaml`
-- `README.md`
+- `MVP-README.md`
+- `PROJECT-README.md`
 
-**Approach:** `render.yaml` declares a paid Render web service with a persistent disk mounted at `/var/data`, `buildCommand: npm install && npm run build`, `startCommand: npm start`, and environment variables `ANTHROPIC_API_KEY` (secret), `MODEL_ID`, `DATA_DIR=/var/data`, `BATCH_CONCURRENCY=4`, `BATCH_RETENTION_HOURS=24`, and `DRAFT_RETENTION_HOURS=2`. The application starts the worker and cleanup loop with the web process; cleanup also runs once at startup. Push repo to GitHub; connect to Render; add `ANTHROPIC_API_KEY` as a secret environment variable. README documents: prerequisites (Node 20+), local development setup, required environment variables, the single outbound network dependency (`api.anthropic.com:443`), the persistent-disk requirement, draft and job retention, upload-interruption behavior, provider rate-limit effects, cloud API dependency, model swappability, the implementation approach and tools used, assumptions made, and explicit trade-offs and limitations.
+**Approach:** `render.yaml` declares a paid Render web service with a persistent disk mounted at `/var/data`, `buildCommand: npm install && npm run build`, `startCommand: npm start`, and environment variables `OPENROUTER_API_KEY` (secret), `OPENROUTER_BASE_URL=https://openrouter.ai/api/v1`, optional `OPENROUTER_SITE_URL` and `OPENROUTER_APP_NAME`, `MODEL_ID=anthropic/claude-haiku-4.5`, `DATA_DIR=/var/data`, `BATCH_CONCURRENCY=4`, `BATCH_RETENTION_HOURS=24`, and `DRAFT_RETENTION_HOURS=2`. The application starts the worker and cleanup loop with the web process; cleanup also runs once at startup. Push repo to GitHub; connect to Render; add `OPENROUTER_API_KEY` as a secret environment variable. `MVP-README.md` and `PROJECT-README.md` document prerequisites (Node 20+), local development setup, required environment variables, OpenRouter account/key setup, the outbound network dependency (`openrouter.ai:443`), provider routing/fallback policy, the persistent-disk requirement, draft and job retention, upload-interruption behavior, provider rate-limit effects, cloud API dependency, model swappability, the implementation approach and tools used, assumptions made, and explicit trade-offs and limitations.
 
 **Test expectation:** none for code — deployment is verified by accessing the live URL
 
-**Verification:** Live Render URL loads the application; representative deployed single-label tests record p50 and p95 with p95 ≤5 seconds under normal load; a finalized batch continues after closing the browser and survives a service restart; expired data is removed; `ANTHROPIC_API_KEY` does not appear in any client-side bundle or network response.
+**Verification:** Live Render URL loads the application; representative deployed single-label tests record p50 and p95 with p95 ≤5 seconds under normal load; a finalized batch continues after closing the browser and survives a service restart; expired data is removed; `OPENROUTER_API_KEY` does not appear in any client-side bundle or network response.
 
 ---
 
 ## Deferred Implementation Notes
 
-- **Streaming extraction**: The Anthropic SDK supports streaming. If the interactive single-label ≤5s target proves tight on slow connections, streaming the extraction response to show partial field results would improve perceived performance.
+- **Streaming extraction**: OpenRouter's OpenAI-compatible API supports streaming for compatible models. If the interactive single-label ≤5s target proves tight on slow connections, streaming the extraction response to show partial field results would improve perceived performance.
 - **Image preprocessing**: Glare, rotation, and low-light images may reduce Haiku's extraction accuracy. The `sharp` Node library can be added to the API route to normalize images before sending — worth pursuing post-prototype if accuracy is insufficient.
-- **Model swapping**: `MODEL_ID` env var allows switching to `claude-sonnet-4-6` or any vision-capable model without code changes. This is the intended path if Haiku accuracy needs a boost.
+- **Model swapping**: `MODEL_ID` allows switching to `anthropic/claude-sonnet-4.6` or another OpenRouter vision-capable model without code changes. This is the intended path if Haiku accuracy needs a boost.
 
 ---
 

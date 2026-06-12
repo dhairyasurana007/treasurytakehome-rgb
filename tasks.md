@@ -32,7 +32,7 @@ Apply this protocol to every task in both sections:
 15. Wait 90 seconds, confirm the fix deployment, verify a 100% pass rate across all applicable required workflows, and rerun the full Playwright gate. Repeat the diagnose, fix, push, wait, deploy, workflow, and Playwright cycle until everything passes.
 16. Continue to the next task only when local checks pass, all applicable required workflows have a 100% pass rate, the deployment is healthy, and deployed Playwright user testing is green.
 
-Playwright tests should use deterministic API fixtures for routine UI behavior. Tasks involving the real Anthropic integration must also include a small live smoke test when credentials are available. Never expose API keys in browser code, traces, screenshots, or responses.
+Playwright tests should use deterministic API fixtures for routine UI behavior. Tasks involving the real OpenRouter integration must also include a small live smoke test when credentials are available. Never expose API keys in browser code, traces, screenshots, or responses.
 
 GitHub Actions workflow files and display names must describe their stable function or purpose, such as `ci.yml` / `CI`, `playwright.yml` / `Playwright`, `production-smoke.yml` / `Production Smoke`, or `retention-cleanup.yml` / `Retention Cleanup`. Never name a workflow after a task number, commit number, implementation sequence, or temporary milestone.
 
@@ -50,7 +50,7 @@ All tasks in this section must be implemented and pushed on the `MVP` branch. Ta
 - Add lint, type-check, unit-test, build, and Playwright scripts.
 - Add Playwright configuration, a smoke-test project, and stable test selectors.
 - Add the initial GitHub Actions CI workflow for install, lint, type-check, unit tests, build, and Playwright smoke tests; upload Playwright reports/traces on failure.
-- Add `.env.example` documenting `ANTHROPIC_API_KEY`, `MODEL_ID`, `DATA_DIR`, `BATCH_CONCURRENCY`, `BATCH_RETENTION_HOURS`, and `DRAFT_RETENTION_HOURS`.
+- Add `.env.example` documenting `OPENROUTER_API_KEY`, `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`), optional `OPENROUTER_SITE_URL` and `OPENROUTER_APP_NAME`, `MODEL_ID` (default `anthropic/claude-haiku-4.5`), `DATA_DIR`, `BATCH_CONCURRENCY`, `BATCH_RETENTION_HOURS`, and `DRAFT_RETENTION_HOURS`.
 - Add `render.yaml` and a minimal health endpoint.
 - Configure the Render web service and persistent disk so `main` auto-deploys.
 - Implement the basic frontend shell: page layout, header, obvious single-label/batch navigation, typography, spacing, responsive container, and placeholder panels for both workflows.
@@ -94,11 +94,13 @@ All tasks in this section must be implemented and pushed on the `MVP` branch. Ta
 
 **After-push Playwright gate:** use the test-environment input harness to submit valid and invalid files; verify clear errors, no model request for rejected files, and no console or network failures. The harness must not be enabled in the public production mode.
 
-### 4. Implement Claude Vision Extraction and Verification API
+### 4. Implement OpenRouter Vision Extraction and Verification API
 
 **Commit:** `integrate vision extraction api`
 
-- Add the Anthropic SDK and server-only client configuration.
+- Add the OpenAI TypeScript SDK and configure its server-only client for OpenRouter using `OPENROUTER_API_KEY` and `OPENROUTER_BASE_URL`.
+- Send optional `HTTP-Referer` and `X-OpenRouter-Title` attribution headers only when their environment values are configured.
+- Use `MODEL_ID`, defaulting to `anthropic/claude-haiku-4.5`, and make any provider-routing or fallback policy explicit.
 - Send the label image with a constrained extraction prompt and structured tool schema.
 - Extract all seven fields plus warning boldness, legibility, and prominence evidence.
 - Combine extraction with deterministic comparison in `/api/verify`.
@@ -107,7 +109,7 @@ All tasks in this section must be implemented and pushed on the `MVP` branch. Ta
 
 **Local checks:** lint, type-check, mocked API tests, guarded live smoke test, and production build.
 
-**GitHub Actions:** run mocked provider tests on every push; keep the live Anthropic smoke test manually triggered or secret-gated so forks and untrusted events cannot access credentials.
+**GitHub Actions:** run mocked provider tests on every push; keep the live OpenRouter smoke test manually triggered or secret-gated so forks and untrusted events cannot access credentials.
 
 **After-push Playwright gate:** use a deterministic mocked provider mode to verify success and failure responses through the browser; when credentials are configured, verify one real sample label end to end and confirm the key never appears in client requests or bundles.
 
@@ -225,7 +227,7 @@ All tasks in this section must be implemented and pushed on the `MVP` branch. Ta
 
 - Confirm production environment variables, persistent disk, worker startup, and cleanup startup hooks.
 - Add representative sample labels and deterministic Playwright fixtures.
-- Create or update `MVP-README.md` with setup/run instructions, architecture, tools, assumptions, firewall dependency, deployment details, and MVP limitations.
+- Create or update `MVP-README.md` with setup/run instructions, OpenRouter account/key and environment configuration, the selected model and routing policy, architecture, tools, assumptions, the `openrouter.ai:443` firewall dependency, deployment details, and MVP limitations.
 - Publish the working application URL.
 - Record deployed single-label p50 and p95 latency; require p95 at or below five seconds under normal load.
 - After the complete deployed MVP Playwright suite passes, merge the `MVP` branch into `main` and verify the merged `main` deployment.
@@ -294,7 +296,7 @@ All tasks in this section begin from the MVP-merged `main` branch and push direc
 
 **Commit:** `finalize documentation and release`
 
-- Create or update `PROJECT-README.md` with setup, local run, environment variables, deployment, architecture, tools, assumptions, trade-offs, limitations, firewall dependency, retention, and the public URL.
+- Create or update `PROJECT-README.md` with setup, local run, OpenRouter account/key and environment configuration, model and routing policy, deployment, architecture, tools, assumptions, trade-offs, limitations, `openrouter.ai:443` firewall dependency, retention, and the public URL.
 - Preserve `README.md` byte-for-byte and verify it was not modified.
 - Verify `PLAN.md`, `CONTEXT.md`, and this file match the implemented behavior.
 - Remove stale instructions and document deferred items without presenting them as complete.
