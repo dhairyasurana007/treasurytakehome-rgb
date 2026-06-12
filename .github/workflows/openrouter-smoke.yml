@@ -1,0 +1,26 @@
+name: OpenRouter Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+      MODEL_ID: anthropic/claude-haiku-4.5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Require configured secret
+        run: test -n "$OPENROUTER_API_KEY"
+      - run: npm test -- tests/openrouter-live.test.ts

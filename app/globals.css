@@ -422,6 +422,14 @@ a:focus-visible {
   padding: 12px;
 }
 
+.validation-harness select {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  padding: 8px 12px;
+}
+
 .validation-harness button {
   min-height: 48px;
   border: 0;
