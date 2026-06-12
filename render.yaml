@@ -31,6 +31,10 @@ services:
         value: "24"
       - key: DRAFT_RETENTION_HOURS
         value: "2"
+      - key: TOMBSTONE_SECRET
+        generateValue: true
+      - key: TOMBSTONE_RETENTION_HOURS
+        value: "48"
     disk:
       name: ttb-label-data
       mountPath: /var/data

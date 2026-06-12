@@ -35,6 +35,11 @@ interface JobRow {
   total: number;
 }
 
+export type JobLookup =
+  | { status: "found"; job: BatchJobView }
+  | { status: "expired" }
+  | { status: "unknown" };
+
 export class BatchStore {
   readonly database: Database.Database;
 
@@ -53,7 +58,8 @@ export class BatchStore {
         status TEXT NOT NULL,
         created_at TEXT NOT NULL,
         expires_at TEXT NOT NULL,
-        manifest_json TEXT
+        manifest_json TEXT,
+        job_id TEXT
       );
 
       CREATE TABLE IF NOT EXISTS draft_files (
@@ -123,6 +129,9 @@ export class BatchStore {
     if (!draftColumns.some((column) => column.name === "manifest_json")) {
       this.database.exec("ALTER TABLE drafts ADD COLUMN manifest_json TEXT");
     }
+    if (!draftColumns.some((column) => column.name === "job_id")) {
+      this.database.exec("ALTER TABLE drafts ADD COLUMN job_id TEXT");
+    }
   }
 
   createDraft(now = new Date(), retentionHours = 2) {
@@ -134,6 +143,109 @@ export class BatchStore {
       )
       .run(id, now.toISOString(), expiresAt.toISOString());
     return { id, expiresAt: expiresAt.toISOString() };
+  }
+
+  private hashId(id: string) {
+    const secret =
+      process.env.TOMBSTONE_SECRET ?? "development-only-tombstone-secret";
+    return crypto.createHmac("sha256", secret).update(id).digest("hex");
+  }
+
+  cleanupExpired(
+    now = new Date(),
+    tombstoneRetentionHours = Number(
+      process.env.TOMBSTONE_RETENTION_HOURS ?? 48,
+    ),
+  ) {
+    const expiredJobs = this.database
+      .prepare("SELECT id FROM jobs WHERE expires_at <= ?")
+      .all(now.toISOString()) as Array<{ id: string }>;
+    const expiredDrafts = this.database
+      .prepare(
+        "SELECT id FROM drafts WHERE status = 'active' AND expires_at <= ?",
+      )
+      .all(now.toISOString()) as Array<{ id: string }>;
+
+    const deleteJob = this.database.transaction((jobId: string) => {
+      const files = this.database
+        .prepare("SELECT image_path FROM items WHERE job_id = ?")
+        .all(jobId) as Array<{ image_path: string }>;
+      const drafts = this.database
+        .prepare("SELECT id FROM drafts WHERE job_id = ?")
+        .all(jobId) as Array<{ id: string }>;
+      this.database
+        .prepare(
+          "INSERT OR REPLACE INTO tombstones (id_hash, expired_at) VALUES (?, ?)",
+        )
+        .run(this.hashId(jobId), now.toISOString());
+      this.database.prepare("DELETE FROM jobs WHERE id = ?").run(jobId);
+      this.database.prepare("DELETE FROM drafts WHERE job_id = ?").run(jobId);
+      return {
+        files: files.map((file) => file.image_path),
+        draftIds: drafts.map((draft) => draft.id),
+      };
+    });
+
+    for (const job of expiredJobs) {
+      const deleted = deleteJob(job.id);
+      for (const file of deleted.files) fs.rmSync(file, { force: true });
+      for (const draftId of deleted.draftIds) {
+        fs.rmSync(
+          path.join(
+            process.env.DATA_DIR ?? path.join(process.cwd(), "data"),
+            "drafts",
+            draftId,
+          ),
+          { recursive: true, force: true },
+        );
+      }
+    }
+
+    for (const draft of expiredDrafts) {
+      const files = this.database
+        .prepare("SELECT path FROM draft_files WHERE draft_id = ?")
+        .all(draft.id) as Array<{ path: string }>;
+      this.database.prepare("DELETE FROM drafts WHERE id = ?").run(draft.id);
+      for (const file of files) fs.rmSync(file.path, { force: true });
+      fs.rmSync(
+        path.join(
+          process.env.DATA_DIR ?? path.join(process.cwd(), "data"),
+          "drafts",
+          draft.id,
+        ),
+        { recursive: true, force: true },
+      );
+    }
+
+    const tombstoneCutoff = new Date(
+      now.getTime() - tombstoneRetentionHours * 3_600_000,
+    );
+    this.database
+      .prepare("DELETE FROM tombstones WHERE expired_at < ?")
+      .run(tombstoneCutoff.toISOString());
+
+    return {
+      jobs: expiredJobs.length,
+      drafts: expiredDrafts.length,
+    };
+  }
+
+  lookupJob(jobId: string, now = new Date()): JobLookup {
+    const row = this.database
+      .prepare("SELECT expires_at FROM jobs WHERE id = ?")
+      .get(jobId) as { expires_at: string } | undefined;
+    if (row && new Date(row.expires_at).getTime() <= now.getTime()) {
+      this.cleanupExpired(now);
+      return { status: "expired" };
+    }
+    if (row) {
+      const job = this.getJob(jobId);
+      return job ? { status: "found", job } : { status: "unknown" };
+    }
+    const tombstone = this.database
+      .prepare("SELECT 1 FROM tombstones WHERE id_hash = ?")
+      .get(this.hashId(jobId));
+    return tombstone ? { status: "expired" } : { status: "unknown" };
   }
 
   getDraft(draftId: string) {
@@ -220,8 +332,10 @@ export class BatchStore {
       if (!draft || draft.status !== "active") return null;
       const jobId = this.createJob(items, now);
       this.database
-        .prepare("UPDATE drafts SET status = 'consumed' WHERE id = ?")
-        .run(draftId);
+        .prepare(
+          "UPDATE drafts SET status = 'consumed', job_id = ? WHERE id = ?",
+        )
+        .run(jobId, draftId);
       return jobId;
     })();
   }
