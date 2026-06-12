@@ -2,31 +2,12 @@
 
 import { useState } from "react";
 
-type Mode = "single" | "batch";
+import SingleLabelWorkspace from "@/components/single-label-workspace";
 
-const panels: Record<
-  Mode,
-  { eyebrow: string; title: string; description: string; steps: string[] }
-> = {
-  single: {
-    eyebrow: "Single label",
-    title: "Check one label in seconds",
-    description:
-      "Upload label artwork and compare it with the application details. You will see a clear result for every required field.",
-    steps: ["Add label artwork", "Enter application details", "Review each result"],
-  },
-  batch: {
-    eyebrow: "Batch review",
-    title: "Process a full importer submission",
-    description:
-      "Upload a CSV and its matching label images. Processing continues safely after you leave the page.",
-    steps: ["Add a CSV manifest", "Upload matching images", "Return to the saved job link"],
-  },
-};
+type Mode = "single" | "batch";
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("single");
-  const panel = panels[mode];
 
   return (
     <main>
@@ -45,7 +26,7 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="hero">
+      <section className="hero compact-hero">
         <div className="shell hero-grid">
           <div>
             <p className="section-label">Faster application review</p>
@@ -86,33 +67,42 @@ export default function Home() {
           </button>
         </div>
 
-        <article
-          className="workflow-card"
-          id="workflow-panel"
-          role="tabpanel"
-          data-testid={`${mode}-panel`}
-        >
-          <div className="workflow-copy">
-            <p className="section-label">{panel.eyebrow}</p>
-            <h2>{panel.title}</h2>
-            <p>{panel.description}</p>
-            <ol>
-              {panel.steps.map((step, index) => (
-                <li key={step}>
-                  <span>{index + 1}</span>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-          <div className="placeholder" aria-label={`${panel.eyebrow} coming soon`}>
-            <div className="placeholder-icon" aria-hidden="true">
-              {mode === "single" ? "1" : "300"}
+        <div id="workflow-panel" role="tabpanel">
+          {mode === "single" ? (
+            <div data-testid="single-panel">
+              <SingleLabelWorkspace />
             </div>
-            <h3>{mode === "single" ? "Single-label form" : "Batch upload form"}</h3>
-            <p>This guided workflow will be added in the next implementation tasks.</p>
-          </div>
-        </article>
+          ) : (
+            <article className="workflow-card" data-testid="batch-panel">
+              <div className="workflow-copy">
+                <p className="section-label">Batch review</p>
+                <h2>Process a full importer submission</h2>
+                <p>
+                  Upload a CSV and its matching label images. Processing
+                  continues safely after you leave the page.
+                </p>
+                <ol>
+                  <li>
+                    <span>1</span>Add a CSV manifest
+                  </li>
+                  <li>
+                    <span>2</span>Upload matching images
+                  </li>
+                  <li>
+                    <span>3</span>Return to the saved job link
+                  </li>
+                </ol>
+              </div>
+              <div className="placeholder" aria-label="Batch review coming soon">
+                <div className="placeholder-icon" aria-hidden="true">
+                  300
+                </div>
+                <h3>Batch upload form</h3>
+                <p>This durable workflow will be added in the next tasks.</p>
+              </div>
+            </article>
+          )}
+        </div>
       </section>
     </main>
   );
