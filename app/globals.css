@@ -449,6 +449,25 @@ a:focus-visible {
   font-weight: 800;
 }
 
+.stored-items {
+  display: grid;
+  gap: 10px;
+  max-width: 600px;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stored-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: white;
+  padding: 14px 16px;
+}
+
 .single-label-form,
 .results-panel {
   border: 1px solid var(--line);

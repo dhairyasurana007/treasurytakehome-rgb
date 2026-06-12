@@ -22,6 +22,8 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+        env:
+          DATA_DIR: ${{ runner.temp }}/ttb-label-data
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
