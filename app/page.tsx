@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import BatchWorkspace from "@/components/batch-workspace";
 import SingleLabelWorkspace from "@/components/single-label-workspace";
 
 type Mode = "single" | "batch";
@@ -73,34 +74,7 @@ export default function Home() {
               <SingleLabelWorkspace />
             </div>
           ) : (
-            <article className="workflow-card" data-testid="batch-panel">
-              <div className="workflow-copy">
-                <p className="section-label">Batch review</p>
-                <h2>Process a full importer submission</h2>
-                <p>
-                  Upload a CSV and its matching label images. Processing
-                  continues safely after you leave the page.
-                </p>
-                <ol>
-                  <li>
-                    <span>1</span>Add a CSV manifest
-                  </li>
-                  <li>
-                    <span>2</span>Upload matching images
-                  </li>
-                  <li>
-                    <span>3</span>Return to the saved job link
-                  </li>
-                </ol>
-              </div>
-              <div className="placeholder" aria-label="Batch review coming soon">
-                <div className="placeholder-icon" aria-hidden="true">
-                  300
-                </div>
-                <h3>Batch upload form</h3>
-                <p>This durable workflow will be added in the next tasks.</p>
-              </div>
-            </article>
+            <BatchWorkspace />
           )}
         </div>
       </section>

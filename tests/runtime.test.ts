@@ -5,6 +5,7 @@ afterEach(() => {
   vi.resetModules();
   vi.restoreAllMocks();
   globalThis.__batchRuntimeStarted = undefined;
+  globalThis.__batchWorker = undefined;
   if (globalThis.__batchCleanupTimer) {
     clearInterval(globalThis.__batchCleanupTimer);
     globalThis.__batchCleanupTimer = undefined;

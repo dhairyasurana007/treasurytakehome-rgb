@@ -15,7 +15,9 @@ test("loads the application shell and switches workflows", async ({ page }) => {
 
   await page.getByTestId("batch-tab").click();
   await expect(page.getByTestId("batch-panel")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Process a full importer submission" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Check multiple labels" }),
+  ).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });
 

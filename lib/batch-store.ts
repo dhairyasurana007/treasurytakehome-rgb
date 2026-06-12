@@ -480,12 +480,22 @@ export class BatchStore {
     })();
   }
 
-  requeueFailedItem(itemId: string) {
-    return this.database
-      .prepare(
-        "UPDATE items SET status = 'pending', error = NULL WHERE id = ? AND status = 'error'",
-      )
-      .run(itemId).changes;
+  requeueFailedItem(itemId: string, jobId?: string) {
+    return this.database.transaction(() => {
+      const result = this.database
+        .prepare(
+          `UPDATE items
+           SET status = 'pending', error = NULL
+           WHERE id = ? AND status = 'error' ${jobId ? "AND job_id = ?" : ""}`,
+        )
+        .run(...(jobId ? [itemId, jobId] : [itemId]));
+      if (result.changes && jobId) {
+        this.database
+          .prepare("UPDATE jobs SET status = 'pending' WHERE id = ?")
+          .run(jobId);
+      }
+      return result.changes;
+    })();
   }
 
   private refreshJobStatus(jobId: string) {
