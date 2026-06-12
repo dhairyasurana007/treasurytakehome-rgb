@@ -11,6 +11,7 @@ import type {
   ClaimedBatchItem,
   NewBatchItem,
 } from "@/lib/batch-types";
+import type { BatchManifestRow } from "@/lib/csv";
 import type { ApplicationData, VerificationResult } from "@/lib/types";
 
 interface ItemRow {
@@ -51,7 +52,21 @@ export class BatchStore {
         id TEXT PRIMARY KEY,
         status TEXT NOT NULL,
         created_at TEXT NOT NULL,
-        expires_at TEXT NOT NULL
+        expires_at TEXT NOT NULL,
+        manifest_json TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS draft_files (
+        id TEXT PRIMARY KEY,
+        draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+        filename TEXT NOT NULL,
+        normalized_filename TEXT NOT NULL,
+        path TEXT NOT NULL,
+        checksum TEXT NOT NULL,
+        mime_type TEXT NOT NULL,
+        width INTEGER NOT NULL,
+        height INTEGER NOT NULL,
+        UNIQUE(draft_id, normalized_filename)
       );
 
       CREATE TABLE IF NOT EXISTS jobs (
@@ -102,6 +117,12 @@ export class BatchStore {
       CREATE INDEX IF NOT EXISTS jobs_expiry_idx ON jobs(expires_at);
       CREATE INDEX IF NOT EXISTS drafts_expiry_idx ON drafts(expires_at);
     `);
+    const draftColumns = this.database
+      .prepare("PRAGMA table_info(drafts)")
+      .all() as Array<{ name: string }>;
+    if (!draftColumns.some((column) => column.name === "manifest_json")) {
+      this.database.exec("ALTER TABLE drafts ADD COLUMN manifest_json TEXT");
+    }
   }
 
   createDraft(now = new Date(), retentionHours = 2) {
@@ -113,6 +134,96 @@ export class BatchStore {
       )
       .run(id, now.toISOString(), expiresAt.toISOString());
     return { id, expiresAt: expiresAt.toISOString() };
+  }
+
+  getDraft(draftId: string) {
+    const draft = this.database
+      .prepare("SELECT * FROM drafts WHERE id = ?")
+      .get(draftId) as
+      | {
+          id: string;
+          status: string;
+          expires_at: string;
+          manifest_json: string | null;
+        }
+      | undefined;
+    if (!draft) return null;
+    const files = this.database
+      .prepare(
+        "SELECT filename, normalized_filename, path, checksum, mime_type, width, height FROM draft_files WHERE draft_id = ? ORDER BY filename",
+      )
+      .all(draftId) as Array<{
+      filename: string;
+      normalized_filename: string;
+      path: string;
+      checksum: string;
+      mime_type: string;
+      width: number;
+      height: number;
+    }>;
+    return {
+      id: draft.id,
+      status: draft.status,
+      expiresAt: draft.expires_at,
+      manifest: draft.manifest_json
+        ? (JSON.parse(draft.manifest_json) as BatchManifestRow[])
+        : null,
+      files,
+    };
+  }
+
+  saveDraftManifest(draftId: string, rows: BatchManifestRow[]) {
+    return this.database
+      .prepare(
+        "UPDATE drafts SET manifest_json = ? WHERE id = ? AND status = 'active'",
+      )
+      .run(JSON.stringify(rows), draftId).changes;
+  }
+
+  addDraftFile(
+    draftId: string,
+    file: {
+      filename: string;
+      normalizedFilename: string;
+      path: string;
+      checksum: string;
+      mimeType: string;
+      width: number;
+      height: number;
+    },
+  ) {
+    this.database
+      .prepare(`
+        INSERT INTO draft_files (
+          id, draft_id, filename, normalized_filename, path, checksum,
+          mime_type, width, height
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `)
+      .run(
+        crypto.randomUUID(),
+        draftId,
+        file.filename,
+        file.normalizedFilename,
+        file.path,
+        file.checksum,
+        file.mimeType,
+        file.width,
+        file.height,
+      );
+  }
+
+  finalizeDraft(draftId: string, items: NewBatchItem[], now = new Date()) {
+    return this.database.transaction(() => {
+      const draft = this.database
+        .prepare("SELECT status FROM drafts WHERE id = ?")
+        .get(draftId) as { status: string } | undefined;
+      if (!draft || draft.status !== "active") return null;
+      const jobId = this.createJob(items, now);
+      this.database
+        .prepare("UPDATE drafts SET status = 'consumed' WHERE id = ?")
+        .run(draftId);
+      return jobId;
+    })();
   }
 
   createJob(
