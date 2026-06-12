@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import AgencySeal from "@/components/agency-seal";
 import BatchWorkspace from "@/components/batch-workspace";
 import SingleLabelWorkspace from "@/components/single-label-workspace";
 
@@ -12,11 +13,20 @@ export default function Home() {
 
   return (
     <main>
+      <div className="gov-banner" role="banner">
+        <div className="shell">
+          <p>
+            <span aria-hidden="true">🇺🇸</span>
+            An official website of the United States government
+          </p>
+        </div>
+      </div>
+
       <header className="site-header">
         <div className="shell header-inner">
           <a className="brand" href="#main-content" aria-label="TTB Label Verifier home">
             <span className="brand-mark" aria-hidden="true">
-              TTB
+              <AgencySeal />
             </span>
             <span>
               <strong>Label Verifier</strong>

@@ -43,6 +43,22 @@ a:focus-visible {
   margin: 0 auto;
 }
 
+.gov-banner {
+  background: #1b1b1b;
+  padding: 5px 0;
+}
+
+.gov-banner p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 .site-header {
   background: var(--navy);
   border-bottom: 2px solid #1258a8;
@@ -65,16 +81,21 @@ a:focus-visible {
 }
 
 .brand-mark {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  place-items: center;
+  display: flex;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
   border-radius: 2px;
   background: white;
   color: var(--navy);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+}
+
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
 }
 
 .brand strong,
