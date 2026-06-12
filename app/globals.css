@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #14213d;
-  --muted: #536078;
-  --paper: #f6f4ef;
+  --ink: #1b1b1b;
+  --muted: #5c6370;
+  --paper: #f0f0f0;
   --white: #ffffff;
-  --navy: #14213d;
-  --gold: #c8942d;
+  --navy: #1a3a6b;
+  --accent: #2e78d2;
   --line: #d9dee7;
   --focus: #1769aa;
 }
@@ -44,8 +44,8 @@ a:focus-visible {
 }
 
 .site-header {
-  background: var(--white);
-  border-bottom: 1px solid var(--line);
+  background: var(--navy);
+  border-bottom: 2px solid #1258a8;
 }
 
 .header-inner {
@@ -60,7 +60,7 @@ a:focus-visible {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: inherit;
+  color: white;
   text-decoration: none;
 }
 
@@ -69,9 +69,9 @@ a:focus-visible {
   width: 44px;
   height: 44px;
   place-items: center;
-  border-radius: 8px;
-  background: var(--navy);
-  color: white;
+  border-radius: 2px;
+  background: white;
+  color: var(--navy);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -84,19 +84,20 @@ a:focus-visible {
 
 .brand strong {
   font-size: 1rem;
+  color: white;
 }
 
 .brand small {
   margin-top: 2px;
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.78rem;
 }
 
 .prototype-badge {
-  border: 1px solid #e2c98f;
-  border-radius: 999px;
-  background: #fff8e8;
-  color: #72500d;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
   padding: 7px 12px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -123,7 +124,7 @@ a:focus-visible {
 
 .section-label {
   margin: 0 0 12px;
-  color: #765006;
+  color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -131,17 +132,17 @@ a:focus-visible {
 }
 
 .hero .section-label {
-  color: #e8c87e;
+  color: #adc8f0;
 }
 
 .hero h1 {
   max-width: 720px;
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.5rem, 6vw, 4.6rem);
-  font-weight: 500;
-  letter-spacing: -0.035em;
-  line-height: 1.02;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
 }
 
 .hero-copy {
@@ -153,7 +154,7 @@ a:focus-visible {
 }
 
 .promise-card {
-  border-left: 3px solid var(--gold);
+  border-left: 3px solid var(--accent);
   padding: 4px 0 4px 24px;
 }
 
@@ -166,15 +167,45 @@ a:focus-visible {
 }
 
 .promise-card strong {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.35rem;
-  font-weight: 500;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
   line-height: 1.4;
 }
 
+.about-section {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 48px 0;
+}
+
+.about-section h2 {
+  margin: 0 0 16px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.about-section p {
+  max-width: 800px;
+  margin: 0 0 14px;
+  color: #3d4451;
+  line-height: 1.7;
+}
+
+.about-section p:last-child {
+  margin-bottom: 0;
+}
+
+.about-section ul {
+  max-width: 640px;
+  margin: 0 0 14px;
+  padding-left: 24px;
+  color: #3d4451;
+  line-height: 1.8;
+}
+
 .workspace {
-  margin-top: -28px;
-  padding-bottom: 72px;
+  padding: 32px 0 72px;
 }
 
 .mode-tabs {
@@ -182,7 +213,7 @@ a:focus-visible {
   overflow: hidden;
   border: 1px solid var(--line);
   border-bottom: 0;
-  border-radius: 10px 10px 0 0;
+  border-radius: 2px 2px 0 0;
   background: #e9ecf1;
 }
 
@@ -205,7 +236,7 @@ a:focus-visible {
 .mode-tabs button[aria-selected="true"] {
   background: var(--white);
   color: var(--navy);
-  box-shadow: inset 0 3px var(--gold);
+  box-shadow: inset 0 3px var(--accent);
 }
 
 .workflow-card {
@@ -214,18 +245,17 @@ a:focus-visible {
   gap: 64px;
   min-height: 430px;
   border: 1px solid var(--line);
-  border-radius: 0 12px 12px 12px;
+  border-radius: 0 4px 4px 4px;
   background: var(--white);
   padding: clamp(32px, 6vw, 64px);
-  box-shadow: 0 18px 45px rgb(20 33 61 / 8%);
 }
 
 .workflow-copy h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 500;
-  line-height: 1.1;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .workflow-copy > p:not(.section-label) {
@@ -255,7 +285,7 @@ a:focus-visible {
   height: 30px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 2px;
   background: #edf1f7;
   color: var(--navy);
   font-size: 0.8rem;
@@ -267,7 +297,7 @@ a:focus-visible {
   justify-items: center;
   min-height: 285px;
   border: 2px dashed #c7cfdb;
-  border-radius: 12px;
+  border-radius: 4px;
   background: #fafbfc;
   padding: 32px;
   text-align: center;
@@ -278,12 +308,13 @@ a:focus-visible {
   min-width: 64px;
   height: 64px;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--navy);
   color: var(--white);
   padding: 0 12px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.35rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
 }
 
 .placeholder h3 {
@@ -327,7 +358,7 @@ a:focus-visible {
   }
 
   .workflow-card {
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 4px 4px;
     padding: 28px 20px;
   }
 
@@ -344,8 +375,9 @@ a:focus-visible {
 
 .harness-shell h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
 }
 
 .verdict-grid {
@@ -358,7 +390,7 @@ a:focus-visible {
 .verdict-card {
   border: 1px solid var(--line);
   border-left-width: 5px;
-  border-radius: 8px;
+  border-radius: 4px;
   background: white;
   padding: 20px;
 }
@@ -415,7 +447,7 @@ a:focus-visible {
   max-width: 560px;
   margin-top: 32px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 4px;
   background: white;
   padding: 24px;
 }
@@ -426,14 +458,14 @@ a:focus-visible {
 
 .validation-harness input {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 12px;
 }
 
 .validation-harness select {
   min-height: 44px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 4px;
   background: white;
   padding: 8px 12px;
 }
@@ -441,7 +473,7 @@ a:focus-visible {
 .validation-harness button {
   min-height: 48px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 2px;
   background: var(--navy);
   color: white;
   cursor: pointer;
@@ -463,7 +495,7 @@ a:focus-visible {
   justify-content: space-between;
   gap: 16px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 4px;
   background: white;
   padding: 14px 16px;
 }
@@ -479,16 +511,15 @@ a:focus-visible {
 .results-panel,
 .batch-workspace {
   border: 1px solid var(--line);
-  border-radius: 0 12px 12px 12px;
+  border-radius: 0 4px 4px 4px;
   background: white;
-  box-shadow: 0 18px 45px rgb(20 33 61 / 8%);
 }
 
 .batch-file-field {
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 4px;
   background: #fafbfc;
   padding: 20px;
 }
@@ -513,7 +544,7 @@ a:focus-visible {
 
 .upload-progress {
   margin: 28px clamp(24px, 5vw, 56px) 0;
-  border-radius: 8px;
+  border-radius: 4px;
   background: #edf4fb;
   padding: 20px;
 }
@@ -557,7 +588,7 @@ a:focus-visible {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #f5f6f8;
   padding: 14px;
 }
@@ -575,9 +606,9 @@ a:focus-visible {
 
 .job-shell h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.3rem, 5vw, 4rem);
-  font-weight: 500;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 700;
 }
 
 .job-heading,
@@ -590,7 +621,7 @@ a:focus-visible {
 
 .secondary-link {
   border: 1px solid var(--navy);
-  border-radius: 6px;
+  border-radius: 2px;
   color: var(--navy);
   padding: 12px 16px;
   font-weight: 800;
@@ -608,7 +639,7 @@ a:focus-visible {
 .job-link-panel,
 .batch-items li {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 4px;
   background: white;
   padding: 20px;
 }
@@ -633,7 +664,7 @@ a:focus-visible {
 .batch-items button {
   min-height: 44px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 2px;
   background: var(--navy);
   color: white;
   cursor: pointer;
@@ -652,8 +683,8 @@ a:focus-visible {
 }
 
 .job-message {
-  border-left: 4px solid var(--gold);
-  background: #fff8e8;
+  border-left: 4px solid var(--accent);
+  background: #edf4fb;
   padding: 14px;
 }
 
@@ -672,7 +703,7 @@ a:focus-visible {
 }
 
 .item-status {
-  border-radius: 999px;
+  border-radius: 2px;
   background: #edf1f7;
   padding: 5px 9px;
   font-size: 0.75rem;
@@ -703,9 +734,9 @@ a:focus-visible {
 .form-intro h2,
 .results-heading-row h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 500;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+  font-weight: 700;
 }
 
 .form-intro p:not(.section-label),
@@ -716,7 +747,7 @@ a:focus-visible {
 
 .form-intro > span {
   flex: 0 0 auto;
-  border-radius: 999px;
+  border-radius: 2px;
   background: #edf1f7;
   padding: 9px 14px;
   font-size: 0.82rem;
@@ -741,7 +772,7 @@ a:focus-visible {
   height: 36px;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 2px;
   background: var(--navy);
   color: white;
   font-weight: 800;
@@ -763,7 +794,7 @@ a:focus-visible {
   place-items: center;
   overflow: hidden;
   border: 2px dashed #b9c3d2;
-  border-radius: 10px;
+  border-radius: 4px;
   background: #fafbfc;
   cursor: pointer;
   text-align: center;
@@ -852,7 +883,7 @@ a:focus-visible {
 .field-group textarea {
   width: 100%;
   border: 1px solid #aeb8c8;
-  border-radius: 6px;
+  border-radius: 2px;
   background: white;
   padding: 12px 14px;
   color: var(--ink);
@@ -874,7 +905,7 @@ a:focus-visible {
 }
 
 .always-required {
-  border-radius: 999px;
+  border-radius: 2px;
   background: #edf1f7;
   padding: 5px 9px;
   font-size: 0.72rem;
@@ -891,7 +922,7 @@ a:focus-visible {
 .request-error {
   margin: 28px clamp(24px, 5vw, 56px) 0;
   border-left: 5px solid #bd3d3d;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #fff2f2;
   padding: 18px 20px;
 }
@@ -917,7 +948,7 @@ a:focus-visible {
 .primary-button {
   min-height: 50px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 2px;
   background: var(--navy);
   color: white;
   cursor: pointer;
@@ -938,7 +969,7 @@ a:focus-visible {
 .overall-badge {
   flex: 0 0 auto;
   border-left: 5px solid;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #f5f6f8;
   padding: 12px 16px;
   font-weight: 800;
@@ -954,7 +985,7 @@ a:focus-visible {
 .result-card {
   border: 1px solid var(--line);
   border-left-width: 5px;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 20px;
 }
 
@@ -989,7 +1020,7 @@ a:focus-visible {
 
 .result-card dl div {
   min-width: 0;
-  border-radius: 6px;
+  border-radius: 2px;
   background: #f5f6f8;
   padding: 12px;
 }
@@ -1014,7 +1045,7 @@ a:focus-visible {
   .single-label-form,
   .results-panel,
   .batch-workspace {
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 4px 4px;
   }
 
   .job-heading,
