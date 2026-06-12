@@ -234,6 +234,35 @@ export class BatchStore {
     })();
   }
 
+  recordAttemptFailure(
+    item: ClaimedBatchItem,
+    error: string,
+    requeue: boolean,
+    now = new Date(),
+  ) {
+    this.database.transaction(() => {
+      this.database
+        .prepare(
+          "UPDATE items SET status = ?, claimed_at = NULL, error = ? WHERE id = ?",
+        )
+        .run(requeue ? "pending" : "error", error, item.id);
+      this.database
+        .prepare(
+          "UPDATE attempts SET status = 'error', error = ?, finished_at = ? WHERE item_id = ? AND attempt_number = ?",
+        )
+        .run(error, now.toISOString(), item.id, item.attemptCount);
+      if (!requeue) this.refreshJobStatus(item.jobId);
+    })();
+  }
+
+  requeueFailedItem(itemId: string) {
+    return this.database
+      .prepare(
+        "UPDATE items SET status = 'pending', error = NULL WHERE id = ? AND status = 'error'",
+      )
+      .run(itemId).changes;
+  }
+
   private refreshJobStatus(jobId: string) {
     const remaining = this.database
       .prepare(

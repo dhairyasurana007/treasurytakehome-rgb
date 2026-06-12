@@ -468,6 +468,13 @@ a:focus-visible {
   padding: 14px 16px;
 }
 
+.harness-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 28px 0;
+}
+
 .single-label-form,
 .results-panel {
   border: 1px solid var(--line);
