@@ -11,7 +11,7 @@ import path from "path";
 // Wake Render before any tests run — prevents cold-start timeouts mid-suite.
 test.beforeAll(async ({ browser }) => {
   const page = await browser.newPage();
-  await page.goto("/", { timeout: 90_000, waitUntil: "domcontentloaded" });
+  await page.goto("/", { timeout: 90_000, waitUntil: "networkidle" });
   await page.close();
 });
 
@@ -218,7 +218,8 @@ const FIXTURES: Fixture[] = [
 ];
 
 async function runSingleVerification(page: Page, fixture: Fixture) {
-  await page.goto("/", { timeout: 60_000, waitUntil: "domcontentloaded" });
+  // networkidle waits for JS bundles + React hydration before we interact
+  await page.goto("/", { timeout: 60_000, waitUntil: "networkidle" });
 
   // Ensure single-label tab is active
   await page.getByRole("tab", { name: "Single label" }).click();
