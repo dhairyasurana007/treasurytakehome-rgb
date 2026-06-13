@@ -10,47 +10,8 @@ type Mode = "single" | "batch";
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("single");
-  const [bannerOpen, setBannerOpen] = useState(false);
-
   return (
     <main>
-      {/* Official government banner */}
-      <div className="gov-banner" role="banner">
-        <div className="shell">
-          <div className="gov-banner-row">
-            <p>
-              <span className="gov-flag" aria-hidden="true">🇺🇸</span>
-              An official website of the United States government
-            </p>
-            <button
-              className="gov-banner-toggle"
-              aria-expanded={bannerOpen}
-              onClick={() => setBannerOpen((o) => !o)}
-            >
-              Here&rsquo;s how you know
-            </button>
-          </div>
-          {bannerOpen && (
-            <div className="gov-banner-expanded">
-              <div className="gov-banner-item">
-                <span className="gov-banner-icon" aria-hidden="true">🏛️</span>
-                <div>
-                  <strong>Official websites use .gov</strong>
-                  <p>A .gov website belongs to an official government organization in the United States.</p>
-                </div>
-              </div>
-              <div className="gov-banner-item">
-                <span className="gov-banner-icon" aria-hidden="true">🔒</span>
-                <div>
-                  <strong>Secure .gov websites use HTTPS</strong>
-                  <p>A lock or <strong>https://</strong> means you&rsquo;ve safely connected to the .gov website.</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Agency header */}
       <header className="site-header">
         <div className="shell header-inner">
