@@ -225,6 +225,17 @@ export default function SingleLabelWorkspace() {
         <label
           className={`upload-zone ${errors.image ? "field-invalid" : ""}`}
           htmlFor="label-image"
+          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const file = e.dataTransfer.files[0] ?? null;
+            if (!file) return;
+            setImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
+            setErrors((current) => ({ ...current, image: "" }));
+          }}
         >
           <input
             id="label-image"
