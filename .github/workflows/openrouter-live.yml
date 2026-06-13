@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   live:
-    if: ${{ secrets.OPENROUTER_API_KEY != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:

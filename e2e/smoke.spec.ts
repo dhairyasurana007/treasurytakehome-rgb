@@ -9,7 +9,7 @@ test("loads the application shell and switches workflows", async ({ page }) => {
   await page.goto("/");
 
   await expect(
-    page.getByRole("heading", { name: "Compare label artwork with confidence." }),
+    page.getByRole("heading", { name: "Alcohol Label Verification" }),
   ).toBeVisible();
   await expect(page.getByTestId("single-panel")).toBeVisible();
 
