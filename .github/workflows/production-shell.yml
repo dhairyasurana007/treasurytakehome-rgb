@@ -1,4 +1,4 @@
-name: Production Smoke
+name: Production Shell
 
 on:
   workflow_dispatch:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  shell:
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
@@ -41,13 +41,13 @@ jobs:
             sleep 15
           done
 
-      - name: Smoke — health and application shell
+      - name: Shell — health endpoint and app navigation
         run: npx playwright test e2e/smoke.spec.ts --project=chromium
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: production-smoke-report
+          name: production-shell-report
           path: |
             playwright-report/
             test-results/
