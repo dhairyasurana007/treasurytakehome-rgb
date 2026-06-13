@@ -287,15 +287,17 @@ async function runSingleVerification(page: Page, fixture: Fixture) {
   await expect(page.getByAltText("Selected label preview")).not.toBeVisible();
 }
 
-// One test per fixture
+// One test per fixture — allow up to 3 minutes for the AI round-trip + reset
 for (const fixture of FIXTURES) {
   test(`single upload: ${fixture.file}`, async ({ page }) => {
+    test.setTimeout(180_000);
     await runSingleVerification(page, fixture);
   });
 }
 
 // Batch smoke: 3 real images across all 3 beverage types
 test("batch upload: mixed beverage types with real images", async ({ page }) => {
+  test.setTimeout(120_000);
   await page.goto("/");
   await page.getByRole("tab", { name: "Batch upload" }).click();
 
