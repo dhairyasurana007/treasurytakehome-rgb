@@ -25,6 +25,8 @@ services:
         value: anthropic/claude-haiku-4.5
       - key: DATA_DIR
         value: /var/data
+      - key: EXTRACTION_MODE
+        value: ""
       - key: BATCH_CONCURRENCY
         value: "4"
       - key: BATCH_RETENTION_HOURS
