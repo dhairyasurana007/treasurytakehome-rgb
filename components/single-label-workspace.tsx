@@ -82,6 +82,16 @@ export default function SingleLabelWorkspace() {
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    const prevent = (e: DragEvent) => e.preventDefault();
+    document.addEventListener("dragover", prevent);
+    document.addEventListener("drop", prevent);
+    return () => {
+      document.removeEventListener("dragover", prevent);
+      document.removeEventListener("drop", prevent);
+    };
+  }, []);
+
   const applicableCount = useMemo(
     () =>
       FIELD_CONFIG.filter((field) => applicability[field.key]).length + 1,
