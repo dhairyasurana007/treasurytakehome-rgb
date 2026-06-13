@@ -32,6 +32,7 @@ jobs:
           e2e/batch-retry-harness.spec.ts
           e2e/batch-expiry-harness.spec.ts
           e2e/batch-workflow.spec.ts
+          e2e/messy-labels.spec.ts
           --project=chromium
         env:
           DATA_DIR: /tmp/ttb-label-data

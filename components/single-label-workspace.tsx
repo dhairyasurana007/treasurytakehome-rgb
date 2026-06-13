@@ -91,6 +91,8 @@ export default function SingleLabelWorkspace() {
   function validate() {
     const nextErrors: Record<string, string> = {};
     if (!image) nextErrors.image = "Choose a label image.";
+    else if (image.size > 5 * 1024 * 1024)
+      nextErrors.image = "The image must be 5 MB or smaller.";
     for (const field of FIELD_CONFIG) {
       if (applicability[field.key] && !values[field.key].trim()) {
         nextErrors[field.key] = `Enter ${field.label.toLocaleLowerCase()}.`;
