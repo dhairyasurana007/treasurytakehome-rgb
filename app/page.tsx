@@ -1,8 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
-import AgencySeal from "@/components/agency-seal";
 import BatchWorkspace from "@/components/batch-workspace";
 import SingleLabelWorkspace from "@/components/single-label-workspace";
 
@@ -10,32 +10,98 @@ type Mode = "single" | "batch";
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("single");
+  const [bannerOpen, setBannerOpen] = useState(false);
 
   return (
     <main>
+      {/* Official government banner */}
       <div className="gov-banner" role="banner">
         <div className="shell">
-          <p>
-            <span aria-hidden="true">🇺🇸</span>
-            An official website of the United States government
-          </p>
+          <div className="gov-banner-row">
+            <p>
+              <span className="gov-flag" aria-hidden="true">🇺🇸</span>
+              An official website of the United States government
+            </p>
+            <button
+              className="gov-banner-toggle"
+              aria-expanded={bannerOpen}
+              onClick={() => setBannerOpen((o) => !o)}
+            >
+              Here&rsquo;s how you know
+            </button>
+          </div>
+          {bannerOpen && (
+            <div className="gov-banner-expanded">
+              <div className="gov-banner-item">
+                <span className="gov-banner-icon" aria-hidden="true">🏛️</span>
+                <div>
+                  <strong>Official websites use .gov</strong>
+                  <p>A .gov website belongs to an official government organization in the United States.</p>
+                </div>
+              </div>
+              <div className="gov-banner-item">
+                <span className="gov-banner-icon" aria-hidden="true">🔒</span>
+                <div>
+                  <strong>Secure .gov websites use HTTPS</strong>
+                  <p>A lock or <strong>https://</strong> means you&rsquo;ve safely connected to the .gov website.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Agency header */}
       <header className="site-header">
         <div className="shell header-inner">
-          <a className="brand" href="#main-content" aria-label="TTB Label Verifier home">
-            <span className="brand-mark" aria-hidden="true">
-              <AgencySeal />
-            </span>
-            <span>
-              <strong>Label Verifier</strong>
-              <small>Compliance review workspace</small>
+          <a className="brand" href="#main-content" aria-label="TTB home">
+            <Image
+              src="/logo.png"
+              alt="Alcohol and Tobacco Tax and Trade Bureau seal"
+              width={60}
+              height={60}
+              className="brand-seal"
+              priority
+            />
+            <span className="brand-text">
+              <span className="brand-abbr">TTB</span>
+              <span className="brand-names">
+                <strong>Alcohol and Tobacco Tax and Trade Bureau</strong>
+                <small>U.S. Department of the Treasury</small>
+              </span>
             </span>
           </a>
-          <span className="prototype-badge">Prototype</span>
+          <div className="header-right">
+            <span className="prototype-badge">Prototype Tool</span>
+          </div>
         </div>
       </header>
+
+      {/* Primary navigation */}
+      <nav className="primary-nav" aria-label="Primary navigation">
+        <div className="shell primary-nav-inner">
+          <ul className="primary-nav-list">
+            <li><a href="#">WHO WE ARE <span aria-hidden="true">▾</span></a></li>
+            <li><a href="#">WHAT WE DO <span aria-hidden="true">▾</span></a></li>
+            <li><a href="#">TTB AUDIENCES <span aria-hidden="true">▾</span></a></li>
+            <li><a href="#">RESOURCES <span aria-hidden="true">▾</span></a></li>
+          </ul>
+          <button className="nav-search-btn" type="button" aria-label="Search">
+            <span aria-hidden="true">🔍</span> SEARCH
+          </button>
+        </div>
+      </nav>
+
+      {/* Secondary highlights bar */}
+      <div className="secondary-bar">
+        <div className="shell">
+          <ul className="secondary-bar-list">
+            <li><a href="#">Label Verification Tool</a></li>
+            <li><a href="#">COLA Online</a></li>
+            <li><a href="#">Tax &amp; Fee Rates</a></li>
+          </ul>
+        </div>
+      </div>
 
       <section className="hero compact-hero">
         <div className="shell hero-grid">

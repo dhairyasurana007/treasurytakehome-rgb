@@ -43,25 +43,92 @@ a:focus-visible {
   margin: 0 auto;
 }
 
+/* ── Official government banner ───────────────────────────── */
 .gov-banner {
-  background: #1b1b1b;
+  background: #f0f0f0;
+  border-bottom: 1px solid #dfe1e2;
   padding: 5px 0;
+  font-size: 0.78rem;
+}
+
+.gov-banner-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .gov-banner p {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  color: #1b1b1b;
 }
 
+.gov-flag {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.gov-banner-toggle {
+  border: 0;
+  background: transparent;
+  color: #005ea2;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.gov-banner-toggle::after {
+  content: " ▾";
+  text-decoration: none;
+  display: inline-block;
+}
+
+.gov-banner-toggle[aria-expanded="true"]::after {
+  content: " ▴";
+}
+
+.gov-banner-expanded {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 48px;
+  padding: 16px 0 12px;
+  border-top: 1px solid #dfe1e2;
+  margin-top: 6px;
+}
+
+.gov-banner-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.gov-banner-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.gov-banner-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #1b1b1b;
+}
+
+.gov-banner-item p {
+  margin: 0;
+  color: #3d4451;
+  line-height: 1.5;
+}
+
+/* ── Agency header ────────────────────────────────────────── */
 .site-header {
-  background: var(--navy);
-  border-bottom: 2px solid #1258a8;
+  background: #1c3d6e;
 }
 
 .header-inner {
@@ -70,6 +137,7 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  padding: 8px 0;
 }
 
 .brand {
@@ -80,50 +148,154 @@ a:focus-visible {
   text-decoration: none;
 }
 
-.brand-mark {
-  display: flex;
-  width: 56px;
-  height: 56px;
+.brand-seal {
   flex: 0 0 auto;
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 3px;
-  border-radius: 2px;
-  background: white;
-  color: var(--navy);
+  gap: 10px;
 }
 
-.brand-mark svg {
-  width: 100%;
-  height: 100%;
-}
-
-.brand strong,
-.brand small {
-  display: block;
-}
-
-.brand strong {
-  font-size: 1rem;
+.brand-abbr {
+  font-size: 2.1rem;
+  font-weight: 800;
   color: white;
+  letter-spacing: -0.01em;
+  line-height: 1;
 }
 
-.brand small {
-  margin-top: 2px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.78rem;
+.brand-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  padding-left: 10px;
+}
+
+.brand-names strong {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+}
+
+.brand-names small {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .prototype-badge {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  background: #2e8540;
   color: white;
-  padding: 7px 12px;
-  font-size: 0.75rem;
+  padding: 8px 16px;
+  font-size: 0.82rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+}
+
+/* ── Primary navigation ───────────────────────────────────── */
+.primary-nav {
+  background: #2459a8;
+}
+
+.primary-nav-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.primary-nav-list {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.primary-nav-list a {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 18px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border-bottom: 3px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.primary-nav-list a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-bottom-color: white;
+}
+
+.nav-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0 18px;
+}
+
+.nav-search-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ── Secondary bar ────────────────────────────────────────── */
+.secondary-bar {
+  background: #e8f0f7;
+  border-bottom: 1px solid #c5d5e8;
+  padding: 8px 0;
+}
+
+.secondary-bar-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.secondary-bar-list li + li::before {
+  content: "|";
+  margin: 0 10px;
+  color: #5c6370;
+}
+
+.secondary-bar-list a {
+  color: #005ea2;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.secondary-bar-list a:hover {
+  text-decoration: underline;
 }
 
 .hero {
