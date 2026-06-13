@@ -8,6 +8,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "path";
 
+// Wake Render before any tests run — prevents cold-start timeouts mid-suite.
+test.beforeAll(async ({ browser }) => {
+  const page = await browser.newPage();
+  await page.goto("/", { timeout: 90_000, waitUntil: "domcontentloaded" });
+  await page.close();
+});
+
 const GOV_WARNING =
   "GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.";
 
@@ -211,7 +218,7 @@ const FIXTURES: Fixture[] = [
 ];
 
 async function runSingleVerification(page: Page, fixture: Fixture) {
-  await page.goto("/");
+  await page.goto("/", { timeout: 60_000, waitUntil: "domcontentloaded" });
 
   // Ensure single-label tab is active
   await page.getByRole("tab", { name: "Single label" }).click();
@@ -311,7 +318,7 @@ test("batch upload: mixed beverage types with real images", async ({ page }) => 
     path.join(FIXTURES_DIR, "fat-tire-ale.jpg"),
   ]);
 
-  await page.getByRole("button", { name: /upload|start|process/i }).click();
+  await page.getByRole("button", { name: "Create batch job" }).click();
 
   // Should enter a processing/job state
   await expect(
