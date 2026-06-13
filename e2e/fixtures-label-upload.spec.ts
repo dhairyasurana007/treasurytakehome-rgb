@@ -223,6 +223,9 @@ async function runSingleVerification(page: Page, fixture: Fixture) {
   // Ensure single-label tab is active
   await page.getByRole("tab", { name: "Single label" }).click();
 
+  // Wait for React hydration before uploading (prevents onChange race on production)
+  await page.locator(".upload-zone").waitFor({ state: "visible" });
+
   // Upload the real fixture image
   const filePath = path.join(FIXTURES_DIR, fixture.file);
   await page.locator("#label-image").setInputFiles(filePath);
