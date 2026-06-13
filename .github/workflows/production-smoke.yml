@@ -7,14 +7,23 @@ on:
         description: Deployed application URL
         required: true
         default: https://ttb-label-verifier-rgb.onrender.com
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
 
 permissions:
   contents: read
 
 jobs:
   smoke:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
+    env:
+      PLAYWRIGHT_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.application_url || 'https://ttb-label-verifier-rgb.onrender.com' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,12 +32,21 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Verify health and public workflow shell
-        env:
-          PLAYWRIGHT_BASE_URL: ${{ inputs.application_url }}
+
+      - name: Wait for Render deploy to settle
         run: |
-          curl --fail --retry 5 --retry-delay 10 "$PLAYWRIGHT_BASE_URL/api/health"
-          npx playwright test e2e/smoke.spec.ts --project=chromium
+          for i in $(seq 1 20); do
+            curl --silent --fail "$PLAYWRIGHT_BASE_URL/api/health" && echo "healthy" && break
+            echo "attempt $i failed, retrying in 15s..."
+            sleep 15
+          done
+
+      - name: Smoke — health and shell
+        run: npx playwright test e2e/smoke.spec.ts --project=chromium
+
+      - name: Smoke — fixture label uploads (real AI)
+        run: npx playwright test e2e/fixtures-label-upload.spec.ts --project=chromium
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
