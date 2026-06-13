@@ -1,6 +1,8 @@
 name: OpenRouter Live
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -8,6 +10,7 @@ permissions:
 
 jobs:
   live:
+    if: ${{ secrets.OPENROUTER_API_KEY != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -21,6 +24,4 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Require configured secret
-        run: test -n "$OPENROUTER_API_KEY"
       - run: npm test -- tests/openrouter-live.test.ts
