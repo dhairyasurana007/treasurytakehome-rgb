@@ -38,7 +38,7 @@ jobs:
           sleep 5
 
       - name: Shell — health endpoint and app navigation
-        run: npx playwright test e2e/smoke.spec.ts --project=chromium
+        run: npx playwright test e2e/smoke.spec.ts --project=chromium --workers=1
 
       - uses: actions/upload-artifact@v4
         if: failure()

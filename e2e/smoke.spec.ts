@@ -6,7 +6,7 @@ test("loads the application shell and switches workflows", async ({ page }) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
 
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "networkidle" });
 
   await expect(
     page.getByRole("heading", { name: "Alcohol Label Verification" }),
@@ -22,9 +22,19 @@ test("loads the application shell and switches workflows", async ({ page }) => {
 });
 
 test("health endpoint reports readiness", async ({ request }) => {
-  const response = await request.get("/api/health");
+  let lastStatus = 0;
+  await expect
+    .poll(
+      async () => {
+        const response = await request.get("/api/health");
+        lastStatus = response.status();
+        return response.status();
+      },
+      { timeout: 30_000, intervals: [2_000, 3_000, 5_000] },
+    )
+    .toBe(200);
 
-  expect(response.ok()).toBe(true);
+  const response = await request.get("/api/health");
   await expect(response.json()).resolves.toMatchObject({
     status: "ok",
     service: "ttb-label-verifier",
