@@ -299,8 +299,8 @@ a:focus-visible {
 }
 
 .hero {
-  background: var(--navy);
-  color: var(--white);
+  background: #fdf9f0;
+  color: var(--navy);
   padding: 64px 0 72px;
 }
 
@@ -325,7 +325,7 @@ a:focus-visible {
 }
 
 .hero .section-label {
-  color: #adc8f0;
+  color: var(--muted);
 }
 
 .hero h1 {
@@ -341,7 +341,7 @@ a:focus-visible {
 .hero-copy {
   max-width: 650px;
   margin: 24px 0 0;
-  color: #dce2ed;
+  color: #3d4451;
   font-size: 1.08rem;
   line-height: 1.7;
 }
@@ -353,7 +353,7 @@ a:focus-visible {
 
 .promise-card p {
   margin: 0 0 8px;
-  color: #bac4d6;
+  color: var(--muted);
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
