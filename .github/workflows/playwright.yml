@@ -1,0 +1,45 @@
+name: Playwright
+
+on:
+  push:
+    branches: [main, MVP]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATA_DIR: ${{ runner.temp }}/ttb-label-data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: >
+          npx playwright test
+          e2e/smoke.spec.ts
+          e2e/single-label.spec.ts
+          e2e/comparison-harness.spec.ts
+          e2e/provider-harness.spec.ts
+          e2e/validation-harness.spec.ts
+          e2e/batch-storage-harness.spec.ts
+          e2e/batch-upload-harness.spec.ts
+          e2e/batch-retry-harness.spec.ts
+          e2e/batch-expiry-harness.spec.ts
+          e2e/batch-workflow.spec.ts
+          --project=chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

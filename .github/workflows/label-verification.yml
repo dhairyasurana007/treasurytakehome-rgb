@@ -1,4 +1,4 @@
-name: Production Smoke
+name: Label Verification
 
 on:
   workflow_dispatch:
@@ -16,12 +16,12 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  verify:
     if: >
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
     env:
       PLAYWRIGHT_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.application_url || 'https://ttb-label-verifier-rgb.onrender.com' }}
     steps:
@@ -41,13 +41,13 @@ jobs:
             sleep 15
           done
 
-      - name: Smoke — health and application shell
-        run: npx playwright test e2e/smoke.spec.ts --project=chromium
+      - name: Label verification — 18 fixture labels with real AI
+        run: npx playwright test e2e/fixtures-label-upload.spec.ts --project=chromium
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: production-smoke-report
+          name: label-verification-report
           path: |
             playwright-report/
             test-results/
