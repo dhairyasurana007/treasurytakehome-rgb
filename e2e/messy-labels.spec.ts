@@ -99,16 +99,14 @@ test("oversized image shows client-side error without submitting", async ({ page
   await page.getByRole("tab", { name: "Single label" }).click();
   await page.locator(".upload-zone").waitFor({ state: "visible" });
 
-  // Inject a synthetic 6 MB JPEG (magic bytes only) via DataTransfer
-  await page.evaluate(() => {
-    const bytes = new Uint8Array(6 * 1024 * 1024);
-    bytes[0] = 0xff; bytes[1] = 0xd8; bytes[2] = 0xff;
-    const file = new File([bytes], "too-big.jpg", { type: "image/jpeg" });
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    const input = document.querySelector<HTMLInputElement>("#label-image")!;
-    input.files = dt.files;
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+  // Use Playwright's native setInputFiles with an in-memory 6 MB JPEG buffer
+  // so React's onChange fires correctly (DataTransfer+dispatchEvent is unreliable)
+  const sixMB = Buffer.alloc(6 * 1024 * 1024);
+  sixMB[0] = 0xff; sixMB[1] = 0xd8; sixMB[2] = 0xff; // JPEG magic bytes
+  await page.locator("#label-image").setInputFiles({
+    name: "too-big.jpg",
+    mimeType: "image/jpeg",
+    buffer: sixMB,
   });
 
   await page.fill("#brand_name", "Test Brand");
