@@ -38,31 +38,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Primary navigation */}
-      <nav className="primary-nav" aria-label="Primary navigation">
-        <div className="shell primary-nav-inner">
-          <ul className="primary-nav-list">
-            <li><a href="#">WHO WE ARE <span aria-hidden="true">▾</span></a></li>
-            <li><a href="#">WHAT WE DO <span aria-hidden="true">▾</span></a></li>
-            <li><a href="#">TTB AUDIENCES <span aria-hidden="true">▾</span></a></li>
-            <li><a href="#">RESOURCES <span aria-hidden="true">▾</span></a></li>
-          </ul>
-          <button className="nav-search-btn" type="button" aria-label="Search">
-            <span aria-hidden="true">🔍</span> SEARCH
-          </button>
-        </div>
-      </nav>
-
-      {/* Secondary highlights bar */}
-      <div className="secondary-bar">
-        <div className="shell">
-          <ul className="secondary-bar-list">
-            <li><a href="#">Label Verification Tool</a></li>
-            <li><a href="#">COLA Online</a></li>
-            <li><a href="#">Tax &amp; Fee Rates</a></li>
-          </ul>
-        </div>
-      </div>
 
       <section className="hero compact-hero">
         <div className="shell hero-grid">
