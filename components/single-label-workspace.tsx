@@ -141,6 +141,7 @@ export default function SingleLabelWorkspace() {
 
   function reset() {
     setImage(null);
+    setPreviewUrl(null);
     setBeverageType("distilled_spirits");
     setValues(INITIAL_VALUES);
     setApplicability(INITIAL_APPLICABILITY);
