@@ -124,15 +124,31 @@ export default function BatchJobViewComponent({ jobId }: { jobId: string }) {
           <h2>Save this job link</h2>
           <p>Anyone with this unguessable link can view results until expiry.</p>
         </div>
-        <button
-          type="button"
-          onClick={async () => {
-            await navigator.clipboard.writeText(window.location.href);
-            setCopied(true);
-          }}
-        >
-          {copied ? "Link copied" : "Copy job link"}
-        </button>
+        <div className="job-link-actions">
+          <button
+            type="button"
+            onClick={async () => {
+              await navigator.clipboard.writeText(window.location.href);
+              setCopied(true);
+            }}
+          >
+            {copied ? "Link copied" : "Copy job link"}
+          </button>
+          <a
+            href={`/api/batch/${jobId}/export`}
+            download
+            className="secondary-link"
+            aria-label={
+              job.status === "completed"
+                ? "Download results as CSV"
+                : "Download partial results as CSV"
+            }
+          >
+            {job.status === "completed"
+              ? "Download results"
+              : "Download partial results"}
+          </a>
+        </div>
       </section>
       {message && <p className="job-message" role="status">{message}</p>}
       <section aria-labelledby="batch-items-heading">

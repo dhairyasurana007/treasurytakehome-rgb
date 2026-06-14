@@ -547,6 +547,26 @@ export class BatchStore {
     };
   }
 
+  getJobExportItems(jobId: string) {
+    return this.database
+      .prepare(
+        `SELECT items.position, items.filename, items.application_json,
+                items.status, items.error, results.result_json
+         FROM items
+         LEFT JOIN results ON results.item_id = items.id
+         WHERE items.job_id = ?
+         ORDER BY items.position`,
+      )
+      .all(jobId) as Array<{
+      position: number;
+      filename: string;
+      application_json: string;
+      status: BatchItemStatus;
+      error: string | null;
+      result_json: string | null;
+    }>;
+  }
+
   close() {
     this.database.close();
   }

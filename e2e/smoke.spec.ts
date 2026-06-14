@@ -22,12 +22,10 @@ test("loads the application shell and switches workflows", async ({ page }) => {
 });
 
 test("health endpoint reports readiness", async ({ request }) => {
-  let lastStatus = 0;
   await expect
     .poll(
       async () => {
         const response = await request.get("/api/health");
-        lastStatus = response.status();
         return response.status();
       },
       { timeout: 30_000, intervals: [2_000, 3_000, 5_000] },

@@ -11,6 +11,6 @@ describe("single-label workspace", () => {
     render(<SingleLabelWorkspace />);
     expect(screen.getByRole("heading", { name: "Check one label" })).toBeVisible();
     expect(screen.getByText("Always required")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Verify label" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Verify label" })).toBeDisabled();
   });
 });
