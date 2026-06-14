@@ -57,45 +57,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="about-section">
-        <div className="shell">
-          <h2>About This Tool</h2>
-          <p>
-            The TTB Label Verifier is a prototype compliance aid for the Alcohol
-            and Tobacco Tax and Trade Bureau (TTB). The TTB reviews approximately
-            150,000 alcohol beverage label applications per year through its
-            Certificate of Label Approval (COLA) process.
-          </p>
-          <p>
-            This tool automates the routine field-matching step of label review.
-            Upload a label image and enter the corresponding application data; the
-            tool extracts text from the label using AI and compares each required
-            field against the submitted values. Fields checked include:
-          </p>
-          <ul>
-            <li>Brand name</li>
-            <li>Class and type designation</li>
-            <li>Alcohol content (ABV)</li>
-            <li>Net contents</li>
-            <li>Bottler name and address</li>
-            <li>Country of origin</li>
-            <li>Mandatory Government Health Warning Statement</li>
-          </ul>
-          <p>
-            Each field receives a verdict of <strong>Match</strong>,{" "}
-            <strong>Needs Review</strong>, or <strong>Mismatch</strong>. Routine
-            matches clear automatically. Judgment calls — including minor
-            formatting differences and ambiguous text — are flagged for agent
-            review rather than auto-rejected.
-          </p>
-          <p>
-            <strong>This is a prototype.</strong> It is not integrated with the
-            COLA system and does not store submission data beyond the current
-            session.
-          </p>
-        </div>
-      </section>
-
       <section className="shell workspace" id="main-content">
         <div className="mode-tabs" role="tablist" aria-label="Verification mode">
           <button
