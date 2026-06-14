@@ -206,13 +206,13 @@ const FIXTURES: Fixture[] = [
     country: "United States",
   },
   {
-    file: "fat-tire-ale.jpg",
+    file: "harbor-lager.png",
     beverageType: "beer",
-    brandName: "Fat Tire",
-    classType: "Amber Ale",
-    abv: "5.2% Alc./Vol.",
-    netContents: "12 fl oz",
-    bottler: "New Belgium Brewing Company, Fort Collins, CO 80524",
+    brandName: "HARBOR LIGHT",
+    classType: "AMERICAN LAGER",
+    abv: "5% ALC./VOL.",
+    netContents: "12 FL. OZ.",
+    bottler: "Harbor Light Brewing, Portland, ME",
     country: "United States",
   },
 ];
@@ -309,7 +309,7 @@ test("batch upload: mixed beverage types with real images", async ({ page }) => 
     `filename,beverage_type,brand_name,class_type,abv,net_contents,bottler,country,government_warning`,
     `buffalo-trace-bourbon.png,distilled_spirits,Buffalo Trace,Kentucky Straight Bourbon Whiskey,45% Alc./Vol.,750 mL,"Buffalo Trace Distillery, Frankfort, KY 40601",United States,"${GOV_WARNING}"`,
     `la-crema-pinot-noir.png,wine,La Crema,Pinot Noir,13.5% Alc./Vol.,750 mL,"La Crema Winery, Santa Rosa, CA 95403",United States,"${GOV_WARNING}"`,
-    `fat-tire-ale.jpg,beer,Fat Tire,Amber Ale,5.2% Alc./Vol.,12 fl oz,"New Belgium Brewing Company, Fort Collins, CO 80524",United States,"${GOV_WARNING}"`,
+    `harbor-lager.png,beer,HARBOR LIGHT,AMERICAN LAGER,5% ALC./VOL.,12 FL. OZ.,"Harbor Light Brewing, Portland, ME",United States,"${GOV_WARNING}"`,
   ].join("\n");
 
   await page.getByLabel("CSV manifest").setInputFiles({
@@ -321,7 +321,7 @@ test("batch upload: mixed beverage types with real images", async ({ page }) => 
   await page.getByLabel("Label images").setInputFiles([
     path.join(FIXTURES_DIR, "buffalo-trace-bourbon.png"),
     path.join(FIXTURES_DIR, "la-crema-pinot-noir.png"),
-    path.join(FIXTURES_DIR, "fat-tire-ale.jpg"),
+    path.join(FIXTURES_DIR, "harbor-lager.png"),
   ]);
 
   await page.getByRole("button", { name: "Create batch job" }).click();
