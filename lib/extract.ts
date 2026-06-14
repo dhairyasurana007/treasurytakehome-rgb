@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import OpenAI from "openai";
 
 import { EXTRACTION_TOOL, extractedFieldsSchema } from "@/lib/extraction-schema";
@@ -7,6 +8,8 @@ import type { ExtractedFields } from "@/lib/types";
 const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_MODEL = "anthropic/claude-haiku-4.5";
 const EXTRACTION_TIMEOUT_MS = 25_000;
+// Keeps images within ~174k tokens (ceil(1024/32)^2 * 170) — safely under the model's 200k limit.
+const MAX_MODEL_DIMENSION = 1024;
 
 export class ExtractionConfigurationError extends Error {}
 export class ExtractionProviderError extends Error {
@@ -35,6 +38,22 @@ const MOCK_EXTRACTION: ExtractedFields = {
   government_warning_legible: true,
   government_warning_prominent: true,
 };
+
+export async function downscaleForModel(
+  bytes: Uint8Array,
+  mimeType: string,
+): Promise<{ bytes: Uint8Array; mimeType: string }> {
+  const { width, height } = await sharp(bytes).metadata();
+  if (!width || !height || (width <= MAX_MODEL_DIMENSION && height <= MAX_MODEL_DIMENSION)) {
+    return { bytes, mimeType };
+  }
+  const scale = MAX_MODEL_DIMENSION / Math.max(width, height);
+  const resized = await sharp(bytes)
+    .resize(Math.round(width * scale), Math.round(height * scale))
+    .jpeg({ quality: 90 })
+    .toBuffer();
+  return { bytes: new Uint8Array(resized), mimeType: "image/jpeg" };
+}
 
 function mockExtraction(scenario: ExtractionOptions["scenario"]) {
   if (scenario === "error") {
@@ -76,6 +95,7 @@ export async function extractLabelFields(
   }
 
   const client = createClient();
+  const { bytes: processedBytes, mimeType: processedMimeType } = await downscaleForModel(bytes, mimeType);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EXTRACTION_TIMEOUT_MS);
 
@@ -99,7 +119,7 @@ export async function extractLabelFields(
               {
                 type: "image_url",
                 image_url: {
-                  url: `data:${mimeType};base64,${Buffer.from(bytes).toString("base64")}`,
+                  url: `data:${processedMimeType};base64,${Buffer.from(processedBytes).toString("base64")}`,
                 },
               },
             ],
