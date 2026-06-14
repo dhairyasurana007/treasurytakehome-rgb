@@ -98,6 +98,14 @@ export default function SingleLabelWorkspace() {
     [applicability],
   );
 
+  const formIncomplete = useMemo(() => {
+    if (!image) return true;
+    if (!values.government_warning.trim()) return true;
+    return FIELD_CONFIG.some(
+      (field) => applicability[field.key] && !values[field.key].trim(),
+    );
+  }, [image, values, applicability]);
+
   function validate() {
     const nextErrors: Record<string, string> = {};
     if (!image) nextErrors.image = "Choose a label image.";
@@ -417,7 +425,7 @@ export default function SingleLabelWorkspace() {
         <button
           className="primary-button"
           type="submit"
-          disabled={status === "submitting"}
+          disabled={status === "submitting" || formIncomplete}
         >
           {status === "submitting" ? "Analyzing label..." : "Verify label"}
         </button>
