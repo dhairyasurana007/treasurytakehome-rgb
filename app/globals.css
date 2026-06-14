@@ -620,14 +620,29 @@ a:focus-visible {
 
 .verdict-match {
   border-left-color: #27835b;
+  background: #f0faf5;
+}
+
+.verdict-match .result-card-heading span {
+  color: #1a6644;
 }
 
 .verdict-needs-review {
   border-left-color: #cf8a17;
+  background: #fffbf0;
+}
+
+.verdict-needs-review .result-card-heading span {
+  color: #a06a10;
 }
 
 .verdict-mismatch {
   border-left-color: #bd3d3d;
+  background: #fef2f2;
+}
+
+.verdict-mismatch .result-card-heading span {
+  color: #9b2828;
 }
 
 .verdict-not-applicable {
