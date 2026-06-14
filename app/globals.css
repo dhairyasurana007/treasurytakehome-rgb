@@ -1187,8 +1187,28 @@ a:focus-visible {
 .results-grid {
   display: grid;
   gap: 16px;
-  padding: 32px clamp(24px, 5vw, 56px);
 }
+
+.results-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px clamp(24px, 5vw, 56px);
+  border-top: 1px solid var(--line);
+}
+
+.results-group-heading {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.verdict-label-mismatch { color: #9b2828; }
+.verdict-label-needs-review { color: #a06a10; }
+.verdict-label-match { color: #1a6644; }
+.verdict-label-not-applicable { color: var(--muted); }
 
 .result-card {
   border: 1px solid var(--line);

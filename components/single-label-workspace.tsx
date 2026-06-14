@@ -179,33 +179,53 @@ export default function SingleLabelWorkspace() {
             Overall: {result.overall_status.replace("-", " ")}
           </span>
         </div>
-        <div className="results-grid">
-          {Object.values(result.fields).map((field) => (
-            <article
-              className={`result-card verdict-${field.verdict}`}
-              data-testid={`result-${field.field}`}
-              key={field.field}
-            >
-              <div className="result-card-heading">
-                <h3>{fieldLabel(field.field)}</h3>
-                <span>{field.verdict.replace("-", " ")}</span>
+        {(
+          [
+            { verdict: "mismatch", label: "Mismatches" },
+            { verdict: "needs-review", label: "Needs review" },
+            { verdict: "match", label: "Matches" },
+            { verdict: "not-applicable", label: "Not applicable" },
+          ] as const
+        ).map(({ verdict, label }) => {
+          const fields = Object.values(result.fields).filter(
+            (f) => f.verdict === verdict,
+          );
+          if (fields.length === 0) return null;
+          return (
+            <div key={verdict} className="results-group">
+              <h3 className={`results-group-heading verdict-label-${verdict}`}>
+                {label}
+              </h3>
+              <div className="results-grid">
+                {fields.map((field) => (
+                  <article
+                    className={`result-card verdict-${field.verdict}`}
+                    data-testid={`result-${field.field}`}
+                    key={field.field}
+                  >
+                    <div className="result-card-heading">
+                      <h3>{fieldLabel(field.field)}</h3>
+                      <span>{field.verdict.replace("-", " ")}</span>
+                    </div>
+                    <p>{field.reason}</p>
+                    {field.verdict !== "not-applicable" && (
+                      <dl>
+                        <div>
+                          <dt>On label</dt>
+                          <dd>{field.extracted || "Not found"}</dd>
+                        </div>
+                        <div>
+                          <dt>In application</dt>
+                          <dd>{field.submitted || "Not provided"}</dd>
+                        </div>
+                      </dl>
+                    )}
+                  </article>
+                ))}
               </div>
-              <p>{field.reason}</p>
-              {field.verdict !== "not-applicable" && (
-                <dl>
-                  <div>
-                    <dt>On label</dt>
-                    <dd>{field.extracted || "Not found"}</dd>
-                  </div>
-                  <div>
-                    <dt>In application</dt>
-                    <dd>{field.submitted || "Not provided"}</dd>
-                  </div>
-                </dl>
-              )}
-            </article>
-          ))}
-        </div>
+            </div>
+          );
+        })}
         <button className="primary-button" type="button" onClick={reset}>
           Verify another label
         </button>
