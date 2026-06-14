@@ -77,7 +77,8 @@ export default function SingleLabelWorkspace() {
   const [requestError, setRequestError] = useState("");
   const startTimeRef = useRef<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
-  const [, setTick] = useState(0);
+  const [timerLabel, setTimerLabel] = useState("");
+  const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     return () => {
@@ -97,8 +98,18 @@ export default function SingleLabelWorkspace() {
 
   useEffect(() => {
     if (status !== "submitting") return;
-    const id = setInterval(() => setTick((t) => t + 1), 100);
+    const id = setInterval(() => {
+      if (startTimeRef.current) {
+        setTimerLabel(
+          ((Date.now() - startTimeRef.current) / 1000).toFixed(1) + "s",
+        );
+      }
+    }, 100);
     return () => clearInterval(id);
+  }, [status]);
+
+  useEffect(() => {
+    if (status === "results") resultsHeadingRef.current?.focus();
   }, [status]);
 
   const applicableCount = useMemo(
@@ -183,7 +194,7 @@ export default function SingleLabelWorkspace() {
     setStatus("idle");
     startTimeRef.current = null;
     setElapsedMs(null);
-    setTick(0);
+    setTimerLabel("");
   }
 
   if (status === "results" && result) {
@@ -192,7 +203,7 @@ export default function SingleLabelWorkspace() {
         <div className="results-heading-row">
           <div>
             <p className="section-label">Verification complete</p>
-            <h2 id="results-heading">Review the label results</h2>
+            <h2 id="results-heading" ref={resultsHeadingRef} tabIndex={-1}>Review the label results</h2>
             <p>
               {applicableCount} applicable fields checked. Confirm anything
               marked for review before continuing.
@@ -438,15 +449,20 @@ export default function SingleLabelWorkspace() {
         </div>
       )}
 
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {status === "submitting" ? "Analyzing label, please wait." : ""}
+      </p>
+
       <div className="form-actions">
         <p>Your image is used only to complete this verification.</p>
         <button
           className="primary-button"
           type="submit"
           disabled={status === "submitting" || formIncomplete}
+          {...(status === "submitting" ? { "data-submitting": "" } : {})}
         >
           {status === "submitting"
-            ? `Analyzing label… ${startTimeRef.current ? ((Date.now() - startTimeRef.current) / 1000).toFixed(1) + "s" : ""}`
+            ? `Analyzing label… ${timerLabel}`
             : "Verify label"}
         </button>
       </div>

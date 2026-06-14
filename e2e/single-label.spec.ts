@@ -41,8 +41,8 @@ test("completes the single-label workflow and resets", async ({ page }) => {
 });
 
 test("shows inline validation and mandatory warning behavior", async ({ page }) => {
-  await page.getByRole("button", { name: "Verify label" }).click();
-  await expect(page.getByText("Choose a label image.")).toBeVisible();
+  // Button is disabled when the form is incomplete (no image selected)
+  await expect(page.getByRole("button", { name: "Verify label" })).toBeDisabled();
   await expect(page.getByText("Always required")).toBeVisible();
 
   const countryRequired = page.getByLabel(

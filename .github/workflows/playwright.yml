@@ -24,6 +24,7 @@ jobs:
           npx playwright test
           e2e/smoke.spec.ts
           e2e/single-label.spec.ts
+          e2e/a11y.spec.ts
           e2e/comparison-harness.spec.ts
           e2e/provider-harness.spec.ts
           e2e/validation-harness.spec.ts
@@ -32,6 +33,7 @@ jobs:
           e2e/batch-retry-harness.spec.ts
           e2e/batch-expiry-harness.spec.ts
           e2e/batch-workflow.spec.ts
+          e2e/batch-export.spec.ts
           e2e/messy-labels.spec.ts
           --project=chromium
         env:
@@ -43,4 +45,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            /tmp/export-downloads/
           retention-days: 7

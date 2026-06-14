@@ -61,6 +61,7 @@ export default function Home() {
         <div className="mode-tabs" role="tablist" aria-label="Verification mode">
           <button
             type="button"
+            id="tab-single"
             role="tab"
             aria-selected={mode === "single"}
             aria-controls="workflow-panel"
@@ -71,6 +72,7 @@ export default function Home() {
           </button>
           <button
             type="button"
+            id="tab-batch"
             role="tab"
             aria-selected={mode === "batch"}
             aria-controls="workflow-panel"
@@ -81,7 +83,11 @@ export default function Home() {
           </button>
         </div>
 
-        <div id="workflow-panel" role="tabpanel">
+        <div
+          id="workflow-panel"
+          role="tabpanel"
+          aria-labelledby={mode === "single" ? "tab-single" : "tab-batch"}
+        >
           {mode === "single" ? (
             <div data-testid="single-panel">
               <SingleLabelWorkspace />
