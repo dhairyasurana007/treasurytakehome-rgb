@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
 import type {
@@ -75,6 +75,9 @@ export default function SingleLabelWorkspace() {
   >("idle");
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [requestError, setRequestError] = useState("");
+  const startTimeRef = useRef<number | null>(null);
+  const [elapsedMs, setElapsedMs] = useState<number | null>(null);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -91,6 +94,12 @@ export default function SingleLabelWorkspace() {
       document.removeEventListener("drop", prevent);
     };
   }, []);
+
+  useEffect(() => {
+    if (status !== "submitting") return;
+    const id = setInterval(() => setTick((t) => t + 1), 100);
+    return () => clearInterval(id);
+  }, [status]);
 
   const applicableCount = useMemo(
     () =>
@@ -130,6 +139,8 @@ export default function SingleLabelWorkspace() {
     setStatus("submitting");
     setRequestError("");
     setResult(null);
+    setElapsedMs(null);
+    startTimeRef.current = Date.now();
     const form = new FormData();
     form.set("image", image);
     form.set(
@@ -147,6 +158,7 @@ export default function SingleLabelWorkspace() {
         error?: string;
       };
       if (!response.ok) throw new Error(body.error);
+      setElapsedMs(Date.now() - (startTimeRef.current ?? Date.now()));
       setResult(body);
       setStatus("results");
     } catch (error) {
@@ -169,6 +181,9 @@ export default function SingleLabelWorkspace() {
     setResult(null);
     setRequestError("");
     setStatus("idle");
+    startTimeRef.current = null;
+    setElapsedMs(null);
+    setTick(0);
   }
 
   if (status === "results" && result) {
@@ -181,6 +196,9 @@ export default function SingleLabelWorkspace() {
             <p>
               {applicableCount} applicable fields checked. Confirm anything
               marked for review before continuing.
+              {elapsedMs !== null && (
+                <> Analysis completed in <strong>{(elapsedMs / 1000).toFixed(1)}s</strong>.</>
+              )}
             </p>
           </div>
           <span className={`overall-badge verdict-${result.overall_status}`}>
@@ -427,7 +445,9 @@ export default function SingleLabelWorkspace() {
           type="submit"
           disabled={status === "submitting" || formIncomplete}
         >
-          {status === "submitting" ? "Analyzing label..." : "Verify label"}
+          {status === "submitting"
+            ? `Analyzing label… ${startTimeRef.current ? ((Date.now() - startTimeRef.current) / 1000).toFixed(1) + "s" : ""}`
+            : "Verify label"}
         </button>
       </div>
     </form>
