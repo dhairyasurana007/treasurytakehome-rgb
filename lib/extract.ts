@@ -6,7 +6,7 @@ import type { ExtractedFields } from "@/lib/types";
 
 const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_MODEL = "anthropic/claude-haiku-4.5";
-const EXTRACTION_TIMEOUT_MS = 4_000;
+const EXTRACTION_TIMEOUT_MS = 25_000;
 
 export class ExtractionConfigurationError extends Error {}
 export class ExtractionProviderError extends Error {
@@ -71,7 +71,7 @@ export async function extractLabelFields(
   bytes: Uint8Array,
   { mimeType, scenario = "success" }: ExtractionOptions,
 ): Promise<ExtractedFields> {
-  if (process.env.EXTRACTION_MODE === "mock") {
+  if (process.env.EXTRACTION_MODE === "mock" && process.env.NODE_ENV !== "production") {
     return mockExtraction(scenario);
   }
 
