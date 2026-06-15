@@ -15,7 +15,7 @@ export default function Home() {
       {/* Agency header */}
       <header className="site-header">
         <div className="shell header-inner">
-          <a className="brand" href="#main-content" aria-label="TTB home">
+          <a className="brand" href="https://www.ttb.gov/" target="_blank" rel="noopener noreferrer" aria-label="TTB home — opens ttb.gov">
             <Image
               src="/logo.png"
               alt="Alcohol and Tobacco Tax and Trade Bureau seal"
