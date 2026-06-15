@@ -218,7 +218,8 @@ export default function SingleLabelWorkspace() {
         </div>
         {previewUrl && result.bboxes && (() => {
           const bboxEntries = (Object.entries(result.bboxes) as [FieldName, { x: number; y: number; w: number; h: number } | null | undefined][]).filter(
-            (entry): entry is [FieldName, { x: number; y: number; w: number; h: number }] => entry[1] != null,
+            (entry): entry is [FieldName, { x: number; y: number; w: number; h: number }] =>
+              entry[1] != null && result.fields[entry[0]]?.verdict !== "not-applicable",
           );
           if (bboxEntries.length === 0) return null;
           return (
