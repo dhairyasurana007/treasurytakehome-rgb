@@ -307,3 +307,22 @@ All tasks in this section begin from the MVP-merged `main` branch and push direc
 **GitHub Actions:** finalize required CI checks, add the full production smoke workflow where credentials permit, and verify workflow documentation matches actual triggers.
 
 **After-push Playwright gate:** execute the entire Playwright suite against the final deployed commit, including single-label, batch, recovery, export, expiry, responsive, accessibility, error, and live smoke scenarios. Any failure restarts the diagnose, fix, push, deploy, and Playwright loop. The project is complete only when this final gate passes.
+
+### 16. Bounding Box Visualization on Extracted Label Fields
+
+**Commit:** `add bounding box visualization`
+
+- Extend the vision extraction tool schema to return an optional `bbox` object per field — `{ x: number; y: number; w: number; h: number }` as fractions of image dimensions (0–1).
+- Prompt the model to provide coordinates only when it is confident about a field's location; omit `bbox` when uncertain rather than hallucinating a region.
+- Pass `bbox` data through the `/api/verify` response alongside existing extracted field values. Do not break existing clients: `bbox` is always optional.
+- In the single-label results panel, display the uploaded label image above the verdict cards. Overlay colored SVG rectangles and field-name labels for every field that returned a bounding box.
+- Color-code each rectangle to match the field's verdict: green for match, orange for needs-review, red for mismatch, and grey for not-applicable. Match the colors of the existing verdict card palette.
+- Show the bounding box overlay only when at least one field has coordinate data; fall back gracefully to the existing cards-only layout when no coordinates are returned.
+- Ensure the overlay is accessible: each `<rect>` carries an `aria-label` describing the field name and verdict; the image has a descriptive `alt` attribute.
+- Do not alter batch flow, comparison logic, verdict computation, or existing test fixtures.
+
+**Local checks:** unit tests for the updated extraction schema (bbox present, bbox absent, partial coverage), UI rendering tests for the overlay (correct colors, correct positioning, graceful no-bbox fallback), lint, type-check, and build.
+
+**GitHub Actions:** no new workflow required; existing Playwright and CI workflows cover this.
+
+**After-push Playwright gate:** submit a single label, confirm the bounding box overlay appears on the results page with at least one visible rectangle, verify each rectangle carries the correct verdict color class, verify the fallback layout when no coordinates are returned, and confirm no regression in the existing fixture label suite.
