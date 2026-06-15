@@ -1335,10 +1335,10 @@ a:focus-visible {
   white-space: nowrap;
 }
 
-.bbox-box.verdict-match .bbox-box-label { background: #27835b; }
-.bbox-box.verdict-needs-review .bbox-box-label { background: #cf8a17; }
-.bbox-box.verdict-mismatch .bbox-box-label { background: #bd3d3d; }
-.bbox-box.verdict-not-applicable .bbox-box-label { background: #7b8495; }
+.bbox-box.verdict-match .bbox-box-label { background: rgba(39, 131, 91, 0.82); }
+.bbox-box.verdict-needs-review .bbox-box-label { background: rgba(207, 138, 23, 0.82); }
+.bbox-box.verdict-mismatch .bbox-box-label { background: rgba(189, 61, 61, 0.82); }
+.bbox-box.verdict-not-applicable .bbox-box-label { background: rgba(123, 132, 149, 0.82); }
 
 @media (max-width: 760px) {
   .single-label-form,
