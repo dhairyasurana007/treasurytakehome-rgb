@@ -216,6 +216,34 @@ export default function SingleLabelWorkspace() {
             Overall: {result.overall_status.replace("-", " ")}
           </span>
         </div>
+        {previewUrl && result.bboxes && (() => {
+          const bboxEntries = (Object.entries(result.bboxes) as [FieldName, { x: number; y: number; w: number; h: number } | null | undefined][]).filter(
+            (entry): entry is [FieldName, { x: number; y: number; w: number; h: number }] => entry[1] != null,
+          );
+          if (bboxEntries.length === 0) return null;
+          return (
+            <div className="label-preview-section">
+              <div className="label-preview-container">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewUrl} alt="Label with annotated field locations" className="label-preview-image" />
+                {bboxEntries.map(([field, bbox]) => (
+                  <div
+                    key={field}
+                    className={`bbox-box verdict-${result.fields[field]?.verdict ?? "not-applicable"}`}
+                    style={{
+                      left: `${bbox.x * 100}%`,
+                      top: `${bbox.y * 100}%`,
+                      width: `${bbox.w * 100}%`,
+                      height: `${bbox.h * 100}%`,
+                    }}
+                  >
+                    <span className="bbox-box-label">{fieldLabel(field)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
         {(
           [
             { verdict: "mismatch", label: "Mismatches" },

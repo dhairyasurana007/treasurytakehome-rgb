@@ -35,7 +35,8 @@ export async function POST(request: Request) {
       scenario,
     });
 
-    return NextResponse.json(compareFields(extracted, application));
+    const result = compareFields(extracted, application);
+    return NextResponse.json({ ...result, bboxes: extracted.bboxes ?? null });
   } catch (error) {
     if (error instanceof SyntaxError) {
       return NextResponse.json(

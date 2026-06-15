@@ -37,6 +37,15 @@ const MOCK_EXTRACTION: ExtractedFields = {
   government_warning_prefix_bold: true,
   government_warning_legible: true,
   government_warning_prominent: true,
+  bboxes: {
+    brand_name: { x: 0.1, y: 0.05, w: 0.8, h: 0.12 },
+    class_type: { x: 0.15, y: 0.2, w: 0.7, h: 0.08 },
+    abv: { x: 0.3, y: 0.55, w: 0.4, h: 0.06 },
+    net_contents: { x: 0.35, y: 0.63, w: 0.3, h: 0.06 },
+    bottler: { x: 0.1, y: 0.72, w: 0.8, h: 0.06 },
+    country: { x: 0.25, y: 0.79, w: 0.5, h: 0.05 },
+    government_warning: { x: 0.05, y: 0.85, w: 0.9, h: 0.1 },
+  },
 };
 
 export async function downscaleForModel(
@@ -107,7 +116,7 @@ export async function extractLabelFields(
           {
             role: "system",
             content:
-              "Extract only text and visual evidence visibly present on this alcohol label. Preserve exact wording and capitalization. Use null when a field or visual property cannot be determined.",
+              "Extract only text and visual evidence visibly present on this alcohol label. Preserve exact wording and capitalization. Use null when a field or visual property cannot be determined. For each text field you locate, also provide its bounding box as fractions of image width and height (x, y, w, h in range 0–1, where x/y is the top-left corner). Only supply a bbox when you can locate the text with high confidence.",
           },
           {
             role: "user",

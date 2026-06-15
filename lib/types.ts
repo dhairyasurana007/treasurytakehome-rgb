@@ -1,3 +1,12 @@
+export interface Bbox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export type Bboxes = Partial<Record<FieldName, Bbox | null>>;
+
 export const FIELD_NAMES = [
   "brand_name",
   "class_type",
@@ -40,6 +49,7 @@ export interface ExtractedFields {
   government_warning_prefix_bold: boolean | null;
   government_warning_legible: boolean | null;
   government_warning_prominent: boolean | null;
+  bboxes?: Bboxes | null;
 }
 
 export interface FieldResult {
@@ -53,4 +63,5 @@ export interface FieldResult {
 export interface VerificationResult {
   fields: Record<FieldName, FieldResult>;
   overall_status: OverallStatus;
+  bboxes?: Bboxes | null;
 }

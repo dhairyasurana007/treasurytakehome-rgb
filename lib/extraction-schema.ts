@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+const bboxSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+  w: z.number(),
+  h: z.number(),
+});
+
 export const extractedFieldsSchema = z.object({
   brand_name: z.string().nullable(),
   class_type: z.string().nullable(),
@@ -11,7 +18,32 @@ export const extractedFieldsSchema = z.object({
   government_warning_prefix_bold: z.boolean().nullable(),
   government_warning_legible: z.boolean().nullable(),
   government_warning_prominent: z.boolean().nullable(),
+  bboxes: z
+    .object({
+      brand_name: bboxSchema.nullable().optional(),
+      class_type: bboxSchema.nullable().optional(),
+      abv: bboxSchema.nullable().optional(),
+      net_contents: bboxSchema.nullable().optional(),
+      bottler: bboxSchema.nullable().optional(),
+      country: bboxSchema.nullable().optional(),
+      government_warning: bboxSchema.nullable().optional(),
+    })
+    .optional()
+    .nullable(),
 });
+
+const BBOX_PROPERTY = {
+  type: ["object", "null"],
+  description: "Location as fractions of image size, or null if uncertain.",
+  additionalProperties: false,
+  properties: {
+    x: { type: "number" },
+    y: { type: "number" },
+    w: { type: "number" },
+    h: { type: "number" },
+  },
+  required: ["x", "y", "w", "h"],
+} as const;
 
 export const EXTRACTION_TOOL = {
   type: "function" as const,
@@ -19,7 +51,6 @@ export const EXTRACTION_TOOL = {
     name: "record_label_fields",
     description:
       "Record alcohol label fields exactly as visibly printed on the supplied artwork.",
-    strict: true,
     parameters: {
       type: "object",
       additionalProperties: false,
@@ -34,6 +65,21 @@ export const EXTRACTION_TOOL = {
         government_warning_prefix_bold: { type: ["boolean", "null"] },
         government_warning_legible: { type: ["boolean", "null"] },
         government_warning_prominent: { type: ["boolean", "null"] },
+        bboxes: {
+          type: ["object", "null"],
+          description:
+            "Bounding boxes for text fields as fractions of image width/height (0–1). Provide coordinates only when you can locate the text with high confidence; use null for fields you cannot find.",
+          additionalProperties: false,
+          properties: {
+            brand_name: BBOX_PROPERTY,
+            class_type: BBOX_PROPERTY,
+            abv: BBOX_PROPERTY,
+            net_contents: BBOX_PROPERTY,
+            bottler: BBOX_PROPERTY,
+            country: BBOX_PROPERTY,
+            government_warning: BBOX_PROPERTY,
+          },
+        },
       },
       required: [
         "brand_name",

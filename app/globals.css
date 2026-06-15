@@ -1293,6 +1293,53 @@ a:focus-visible {
   margin-left: clamp(24px, 5vw, 56px);
 }
 
+.label-preview-section {
+  padding: 28px clamp(24px, 5vw, 56px);
+  border-top: 1px solid var(--line);
+}
+
+.label-preview-container {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.label-preview-image {
+  display: block;
+  max-width: 480px;
+  width: 100%;
+  height: auto;
+}
+
+.bbox-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid;
+  pointer-events: none;
+}
+
+.bbox-box.verdict-match { border-color: #27835b; }
+.bbox-box.verdict-needs-review { border-color: #cf8a17; }
+.bbox-box.verdict-mismatch { border-color: #bd3d3d; }
+.bbox-box.verdict-not-applicable { border-color: #7b8495; }
+
+.bbox-box-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1px 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.bbox-box.verdict-match .bbox-box-label { background: #27835b; }
+.bbox-box.verdict-needs-review .bbox-box-label { background: #cf8a17; }
+.bbox-box.verdict-mismatch .bbox-box-label { background: #bd3d3d; }
+.bbox-box.verdict-not-applicable .bbox-box-label { background: #7b8495; }
+
 @media (max-width: 760px) {
   .single-label-form,
   .results-panel,
