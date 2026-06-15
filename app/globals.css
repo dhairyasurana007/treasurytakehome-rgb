@@ -48,7 +48,7 @@ a:focus-visible {
   background: #f0f0f0;
   border-bottom: 1px solid #dfe1e2;
   padding: 5px 0;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
 }
 
 .gov-banner-row {
@@ -76,7 +76,7 @@ a:focus-visible {
   color: #005ea2;
   cursor: pointer;
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   padding: 0;
   text-decoration: underline;
   white-space: nowrap;
@@ -179,7 +179,7 @@ a:focus-visible {
 
 .brand-names strong {
   display: block;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: white;
   line-height: 1.3;
@@ -187,7 +187,7 @@ a:focus-visible {
 
 .brand-names small {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: rgba(255, 255, 255, 0.75);
 }
 
@@ -202,7 +202,7 @@ a:focus-visible {
   background: #2e8540;
   color: white;
   padding: 8px 16px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -232,7 +232,7 @@ a:focus-visible {
   gap: 4px;
   padding: 14px 18px;
   color: white;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-decoration: none;
@@ -254,7 +254,7 @@ a:focus-visible {
   color: white;
   cursor: pointer;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   padding: 0 18px;
@@ -289,7 +289,7 @@ a:focus-visible {
 
 .secondary-bar-list a {
   color: #005ea2;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
 }
@@ -318,9 +318,9 @@ a:focus-visible {
 .section-label {
   margin: 0 0 12px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -354,8 +354,8 @@ a:focus-visible {
 .promise-card p {
   margin: 0 0 8px;
   color: var(--muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -474,14 +474,14 @@ a:focus-visible {
 
 .workflow-copy li span {
   display: grid;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 2px;
   background: #edf1f7;
   color: var(--navy);
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .placeholder {
@@ -599,9 +599,9 @@ a:focus-visible {
 
 .verdict-card span {
   margin-top: 8px;
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -772,7 +772,7 @@ a:focus-visible {
 .upload-progress p {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .recent-jobs {
@@ -803,7 +803,7 @@ a:focus-visible {
 
 .recent-jobs span {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .job-shell {
@@ -859,7 +859,7 @@ a:focus-visible {
 
 .job-summary span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.9rem;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -921,8 +921,8 @@ a:focus-visible {
 .item-status {
   border-radius: 2px;
   background: #edf1f7;
-  padding: 5px 9px;
-  font-size: 0.75rem;
+  padding: 5px 10px;
+  font-size: 0.875rem;
   font-weight: 800;
   text-transform: capitalize;
 }
@@ -966,7 +966,7 @@ a:focus-visible {
   border-radius: 2px;
   background: #edf1f7;
   padding: 9px 14px;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
@@ -1083,15 +1083,15 @@ a:focus-visible {
 .applicability-control {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
 .applicability-control input {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
 }
 
 .field-group > input,
@@ -1123,15 +1123,15 @@ a:focus-visible {
 .always-required {
   border-radius: 2px;
   background: #edf1f7;
-  padding: 5px 9px;
-  font-size: 0.72rem;
+  padding: 5px 10px;
+  font-size: 0.875rem;
   font-weight: 800;
 }
 
 .field-error {
   margin: 7px 0 0;
   color: #9b2525;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
@@ -1158,7 +1158,7 @@ a:focus-visible {
 .form-actions p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .primary-button {
@@ -1223,9 +1223,9 @@ a:focus-visible {
 
 .results-group-heading {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -1253,7 +1253,7 @@ a:focus-visible {
 }
 
 .result-card-heading span {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -1279,7 +1279,7 @@ a:focus-visible {
 
 .result-card dt {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.875rem;
   font-weight: 800;
   text-transform: uppercase;
 }
