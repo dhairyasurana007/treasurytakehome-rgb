@@ -232,7 +232,7 @@ export default function BatchWorkspace() {
         )}
         <div className="form-actions">
           <p>Only finalized jobs appear in your recent jobs list.</p>
-          <button className="primary-button" disabled={uploading} type="submit">
+          <button className="primary-button" disabled={uploading || !manifest || !images.length} type="submit">
             {uploading ? "Uploading batch..." : "Create batch job"}
           </button>
         </div>
