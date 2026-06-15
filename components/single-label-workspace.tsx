@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
 import type {
   ApplicationData,
+  Bbox,
   ConditionalFieldName,
   FieldName,
   VerificationResult,
@@ -79,6 +80,27 @@ export default function SingleLabelWorkspace() {
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [timerLabel, setTimerLabel] = useState("");
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
+  const [activeField, setActiveField] = useState<FieldName | null>(null);
+  const cardRefs = useRef<Partial<Record<FieldName, HTMLElement | null>>>({});
+  const boxRefs = useRef<Partial<Record<FieldName, HTMLButtonElement | null>>>(
+    {},
+  );
+
+  function revealCard(field: FieldName) {
+    setActiveField(field);
+    cardRefs.current[field]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
+
+  function revealBox(field: FieldName) {
+    setActiveField(field);
+    boxRefs.current[field]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }
 
   useEffect(() => {
     return () => {
@@ -195,9 +217,20 @@ export default function SingleLabelWorkspace() {
     startTimeRef.current = null;
     setElapsedMs(null);
     setTimerLabel("");
+    setActiveField(null);
   }
 
   if (status === "results" && result) {
+    const bboxEntries = result.bboxes
+      ? (
+          Object.entries(result.bboxes) as [FieldName, Bbox | null | undefined][]
+        ).filter(
+          (entry): entry is [FieldName, Bbox] =>
+            entry[1] != null &&
+            result.fields[entry[0]]?.verdict !== "not-applicable",
+        )
+      : [];
+    const bboxFields = new Set(bboxEntries.map(([field]) => field));
     return (
       <section className="results-panel" aria-labelledby="results-heading">
         <div className="results-heading-row">
@@ -216,35 +249,40 @@ export default function SingleLabelWorkspace() {
             Overall: {result.overall_status.replace("-", " ")}
           </span>
         </div>
-        {previewUrl && result.bboxes && (() => {
-          const bboxEntries = (Object.entries(result.bboxes) as [FieldName, { x: number; y: number; w: number; h: number } | null | undefined][]).filter(
-            (entry): entry is [FieldName, { x: number; y: number; w: number; h: number }] =>
-              entry[1] != null && result.fields[entry[0]]?.verdict !== "not-applicable",
-          );
-          if (bboxEntries.length === 0) return null;
-          return (
-            <div className="label-preview-section">
-              <div className="label-preview-container">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Label with annotated field locations" className="label-preview-image" />
-                {bboxEntries.map(([field, bbox]) => (
-                  <div
+        {previewUrl && bboxEntries.length > 0 && (
+          <div className="label-preview-section">
+            <p className="label-preview-hint">
+              Select a highlighted area to jump to its field below.
+            </p>
+            <div className="label-preview-container">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewUrl} alt="Label with annotated field locations" className="label-preview-image" />
+              {bboxEntries.map(([field, bbox]) => {
+                const verdict = result.fields[field]?.verdict ?? "not-applicable";
+                return (
+                  <button
+                    type="button"
                     key={field}
-                    className={`bbox-box verdict-${result.fields[field]?.verdict ?? "not-applicable"}`}
+                    ref={(el) => {
+                      boxRefs.current[field] = el;
+                    }}
+                    className={`bbox-box verdict-${verdict}${activeField === field ? " is-active" : ""}`}
                     style={{
                       left: `${bbox.x * 100}%`,
                       top: `${bbox.y * 100}%`,
                       width: `${bbox.w * 100}%`,
                       height: `${bbox.h * 100}%`,
                     }}
+                    onClick={() => revealCard(field)}
+                    aria-label={`${fieldLabel(field)} on label — jump to its field details`}
                   >
                     <span className="bbox-box-label">{fieldLabel(field)}</span>
-                  </div>
-                ))}
-              </div>
+                  </button>
+                );
+              })}
             </div>
-          );
-        })()}
+          </div>
+        )}
         {(
           [
             { verdict: "mismatch", label: "Mismatches" },
@@ -265,15 +303,27 @@ export default function SingleLabelWorkspace() {
               <div className="results-grid">
                 {fields.map((field) => (
                   <article
-                    className={`result-card verdict-${field.verdict}`}
+                    className={`result-card verdict-${field.verdict}${activeField === field.field ? " is-active" : ""}`}
                     data-testid={`result-${field.field}`}
                     key={field.field}
+                    ref={(el) => {
+                      cardRefs.current[field.field] = el;
+                    }}
                   >
                     <div className="result-card-heading">
                       <h3>{fieldLabel(field.field)}</h3>
                       <span>{field.verdict.replace("-", " ")}</span>
                     </div>
                     <p>{field.reason}</p>
+                    {bboxFields.has(field.field) && (
+                      <button
+                        type="button"
+                        className="bbox-jump-link"
+                        onClick={() => revealBox(field.field)}
+                      >
+                        Show on label
+                      </button>
+                    )}
                     {field.verdict !== "not-applicable" && (
                       <dl>
                         <div>
