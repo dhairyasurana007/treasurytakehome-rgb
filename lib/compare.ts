@@ -53,8 +53,11 @@ function compareBrand(submitted: string, extracted: string | null): FieldResult 
   if (!extracted) {
     return result("brand_name", "mismatch", submitted, extracted, "Brand name was not found.");
   }
-  if (extracted === submitted) {
-    return result("brand_name", "match", submitted, extracted, "Brand names match exactly.");
+  if (
+    compact(extracted).toLocaleLowerCase("en-US") ===
+    compact(submitted).toLocaleLowerCase("en-US")
+  ) {
+    return result("brand_name", "match", submitted, extracted, "Brand names match.");
   }
   if (
     canonicalWords(extracted) === canonicalWords(submitted) ||

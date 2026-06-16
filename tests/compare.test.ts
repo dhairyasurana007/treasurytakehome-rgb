@@ -40,13 +40,19 @@ describe("field comparison", () => {
     expect(Object.values(result.fields).every((field) => field.verdict === "match")).toBe(true);
   });
 
-  it("flags capitalization and punctuation-only brand differences for review", () => {
+  it("treats case-only brand differences as a match", () => {
     const result = compareFields(
-      { ...extracted, brand_name: "STONE'S THROW" },
-      {
-        ...application,
-        values: { ...application.values, brand_name: "Stone's Throw" },
-      },
+      { ...extracted, brand_name: "old tom distillery" },
+      application,
+    );
+    expect(result.fields.brand_name.verdict).toBe("match");
+    expect(result.overall_status).toBe("match");
+  });
+
+  it("flags punctuation-only brand differences for review", () => {
+    const result = compareFields(
+      { ...extracted, brand_name: "OLD TOM DISTILLERY." },
+      application,
     );
     expect(result.fields.brand_name.verdict).toBe("needs-review");
     expect(result.overall_status).toBe("needs-review");
