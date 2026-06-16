@@ -56,6 +56,12 @@ const INITIAL_APPLICABILITY: ApplicationData["applicability"] = {
   government_warning: true,
 };
 
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+const ZOOM_STEP = 0.5;
+const clampZoom = (value: number) =>
+  Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(value * 100) / 100));
+
 function fieldLabel(field: FieldName) {
   return (
     FIELD_CONFIG.find((item) => item.key === field)?.label ??
@@ -66,6 +72,7 @@ function fieldLabel(field: FieldName) {
 export default function SingleLabelWorkspace() {
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
   const [showBboxes, setShowBboxes] = useState(false);
   const [beverageType, setBeverageType] =
     useState<ApplicationData["beverage_type"]>("distilled_spirits");
@@ -209,6 +216,7 @@ export default function SingleLabelWorkspace() {
   function reset() {
     setImage(null);
     setPreviewUrl(null);
+    setZoom(1);
     setBeverageType("distilled_spirits");
     setValues(INITIAL_VALUES);
     setApplicability(INITIAL_APPLICABILITY);
@@ -383,6 +391,7 @@ export default function SingleLabelWorkspace() {
             if (!file) return;
             setImage(file);
             setPreviewUrl(URL.createObjectURL(file));
+            setZoom(1);
             setErrors((current) => ({ ...current, image: "" }));
           }}
         >
@@ -395,13 +404,21 @@ export default function SingleLabelWorkspace() {
               const selected = event.target.files?.[0] ?? null;
               setImage(selected);
               setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
+              setZoom(1);
               setErrors((current) => ({ ...current, image: "" }));
             }}
           />
           {previewUrl ? (
-            // A blob URL is generated from a user-selected local file.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={previewUrl} alt="Selected label preview" />
+            <div className="preview-viewport">
+              {/* A blob URL is generated from a user-selected local file. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={previewUrl}
+                alt="Selected label preview"
+                className="preview-image"
+                style={{ width: `${zoom * 100}%` }}
+              />
+            </div>
           ) : (
             <div>
               <strong>Choose label artwork</strong>
@@ -409,6 +426,43 @@ export default function SingleLabelWorkspace() {
             </div>
           )}
         </label>
+        {previewUrl && (
+          <div
+            className="zoom-controls"
+            role="group"
+            aria-label="Zoom label preview"
+          >
+            <button
+              type="button"
+              className="zoom-button"
+              onClick={() => setZoom((value) => clampZoom(value - ZOOM_STEP))}
+              disabled={zoom <= MIN_ZOOM}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
+            <span className="zoom-level" aria-live="polite">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              className="zoom-button"
+              onClick={() => setZoom((value) => clampZoom(value + ZOOM_STEP))}
+              disabled={zoom >= MAX_ZOOM}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              className="zoom-reset"
+              onClick={() => setZoom(1)}
+              disabled={zoom === 1}
+            >
+              Reset
+            </button>
+          </div>
+        )}
         {errors.image && <p className="field-error">{errors.image}</p>}
       </section>
 
