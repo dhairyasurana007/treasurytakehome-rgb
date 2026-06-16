@@ -3,7 +3,8 @@ import OpenAI from "openai";
 
 import { EXTRACTION_TOOL, extractedFieldsSchema } from "@/lib/extraction-schema";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
-import type { ExtractedFields } from "@/lib/types";
+import { tightenBboxes } from "@/lib/tighten-bbox";
+import type { Bboxes, ExtractedFields } from "@/lib/types";
 
 const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_MODEL = "anthropic/claude-haiku-4.5";
@@ -150,7 +151,14 @@ export async function extractLabelFields(
         "The vision provider did not return structured label fields.",
       );
     }
-    return extractedFieldsSchema.parse(JSON.parse(toolCall.function.arguments));
+    const parsed = extractedFieldsSchema.parse(
+      JSON.parse(toolCall.function.arguments),
+    );
+    if (!parsed.bboxes) return parsed;
+    // Deterministically trim each box to its inked text so the geometry no
+    // longer relies on the model's pixel precision.
+    const bboxes = await tightenBboxes(processedBytes, parsed.bboxes as Bboxes);
+    return { ...parsed, bboxes };
   } catch (error) {
     if (error instanceof ExtractionProviderError) throw error;
     if (controller.signal.aborted) {

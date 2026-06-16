@@ -1385,14 +1385,25 @@ a:focus-visible {
 
 .bbox-box-label {
   position: absolute;
-  top: 0;
-  left: 0;
-  padding: 1px 5px;
-  font-size: 0.7rem;
+  bottom: 100%;
+  left: -2px;
+  margin-bottom: 3px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 0.72rem;
   font-weight: 700;
   color: white;
-  line-height: 1.4;
+  line-height: 1.5;
   white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.bbox-box:hover .bbox-box-label,
+.bbox-box:focus-visible .bbox-box-label,
+.bbox-box.is-active .bbox-box-label {
+  opacity: 1;
 }
 
 .bbox-box.verdict-match .bbox-box-label { background: rgba(39, 131, 91, 0.82); }
