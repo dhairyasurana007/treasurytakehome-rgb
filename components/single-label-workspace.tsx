@@ -416,7 +416,7 @@ export default function SingleLabelWorkspace() {
                 src={previewUrl}
                 alt="Selected label preview"
                 className="preview-image"
-                style={{ width: `${zoom * 100}%` }}
+                style={{ height: `${zoom * 100}%` }}
               />
             </div>
           ) : (
