@@ -1,12 +1,7 @@
 import sharp from "sharp";
 import { createWorker } from "tesseract.js";
 
-import {
-  FIELD_NAMES,
-  type Bbox,
-  type Bboxes,
-  type ExtractedFields,
-} from "@/lib/types";
+import { type Bbox } from "@/lib/types";
 
 export interface OcrWord {
   text: string;
@@ -14,6 +9,12 @@ export interface OcrWord {
   y0: number;
   x1: number;
   y1: number;
+}
+
+export interface OcrResult {
+  words: OcrWord[];
+  width: number;
+  height: number;
 }
 
 // Minimal shape of the Tesseract page we traverse, kept local so we do not
@@ -128,14 +129,14 @@ export function matchFieldBox(
   };
 }
 
-// Run OCR once and derive a box for each text field from the matched words.
-// Returns only the fields it confidently locates; the caller falls back to the
-// model's box for the rest. Any OCR failure yields an empty map so the caller
-// degrades gracefully rather than throwing.
-export async function ocrBboxes(
+// Run OCR once and return every word with its pixel box plus the image
+// dimensions. This is the expensive step (worker init + recognition), so the
+// caller runs it concurrently with the vision request and does the cheap
+// per-field matching itself. Returns null on any failure so callers degrade
+// gracefully rather than throwing.
+export async function recognizeWords(
   bytes: Uint8Array,
-  extracted: ExtractedFields,
-): Promise<Bboxes> {
+): Promise<OcrResult | null> {
   let width = 0;
   let height = 0;
   try {
@@ -143,26 +144,18 @@ export async function ocrBboxes(
     width = meta.width ?? 0;
     height = meta.height ?? 0;
   } catch {
-    return {};
+    return null;
   }
-  if (!width || !height) return {};
+  if (!width || !height) return null;
 
-  let words: OcrWord[] = [];
   const worker = await createWorker("eng");
   try {
     const result = await worker.recognize(Buffer.from(bytes), {}, { blocks: true });
-    words = collectWords(result.data as unknown as RawPage);
+    const words = collectWords(result.data as unknown as RawPage);
+    return words.length ? { words, width, height } : null;
+  } catch {
+    return null;
   } finally {
     await worker.terminate();
   }
-  if (!words.length) return {};
-
-  const boxes: Bboxes = {};
-  for (const field of FIELD_NAMES) {
-    const text = extracted[field];
-    if (!text) continue;
-    const box = matchFieldBox(words, text, width, height);
-    if (box) boxes[field] = box;
-  }
-  return boxes;
 }

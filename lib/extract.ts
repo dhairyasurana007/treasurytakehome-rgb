@@ -3,7 +3,11 @@ import OpenAI from "openai";
 
 import { EXTRACTION_TOOL, extractedFieldsSchema } from "@/lib/extraction-schema";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
-import { ocrBboxes } from "@/lib/ocr-bbox";
+import {
+  matchFieldBox,
+  recognizeWords,
+  type OcrResult,
+} from "@/lib/ocr-bbox";
 import { tightenBboxes } from "@/lib/tighten-bbox";
 import { FIELD_NAMES, type Bboxes, type ExtractedFields } from "@/lib/types";
 
@@ -86,20 +90,32 @@ function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T
 
 // Resolve a box for each field, preferring deterministic OCR geometry and
 // falling back to the model's own (width-trimmed) box where OCR cannot locate
-// the text. OCR is time-boxed so a slow cold start never blocks the response.
+// the text. The OCR result is fetched concurrently with the vision call, so
+// the matching here is cheap.
 async function resolveBboxes(
   bytes: Uint8Array,
   parsed: ExtractedFields,
+  ocr: OcrResult | null,
 ): Promise<Bboxes | null> {
   const modelBoxes: Bboxes = parsed.bboxes
     ? await tightenBboxes(bytes, parsed.bboxes)
     : {};
-  const ocr = await withTimeout(ocrBboxes(bytes, parsed), OCR_TIMEOUT_MS, {});
+
+  const ocrBoxes: Bboxes = {};
+  if (ocr) {
+    for (const field of FIELD_NAMES) {
+      const text = parsed[field];
+      if (!text) continue;
+      const box = matchFieldBox(ocr.words, text, ocr.width, ocr.height);
+      if (box) ocrBoxes[field] = box;
+    }
+  }
 
   const merged: Bboxes = {};
   let located = false;
   for (const field of FIELD_NAMES) {
-    const box = ocr[field] ?? modelBoxes[field] ?? parsed.bboxes?.[field] ?? null;
+    const box =
+      ocrBoxes[field] ?? modelBoxes[field] ?? parsed.bboxes?.[field] ?? null;
     merged[field] = box;
     if (box) located = true;
   }
@@ -147,6 +163,14 @@ export async function extractLabelFields(
 
   const client = createClient();
   const { bytes: processedBytes, mimeType: processedMimeType } = await downscaleForModel(bytes, mimeType);
+  // Start OCR now so it runs concurrently with the vision request; it usually
+  // finishes within that window and adds little wall-clock. Time-boxed and
+  // null-safe so a slow cold start can never block or break the response.
+  const ocrPromise = withTimeout(
+    recognizeWords(processedBytes),
+    OCR_TIMEOUT_MS,
+    null,
+  );
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EXTRACTION_TIMEOUT_MS);
 
@@ -195,7 +219,8 @@ export async function extractLabelFields(
     const parsed = extractedFieldsSchema.parse(
       JSON.parse(toolCall.function.arguments),
     );
-    const bboxes = await resolveBboxes(processedBytes, parsed);
+    const ocr = await ocrPromise;
+    const bboxes = await resolveBboxes(processedBytes, parsed, ocr);
     return { ...parsed, bboxes };
   } catch (error) {
     if (error instanceof ExtractionProviderError) throw error;
