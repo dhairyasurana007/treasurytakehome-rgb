@@ -3,8 +3,9 @@ import OpenAI from "openai";
 
 import { EXTRACTION_TOOL, extractedFieldsSchema } from "@/lib/extraction-schema";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
+import { ocrBboxes } from "@/lib/ocr-bbox";
 import { tightenBboxes } from "@/lib/tighten-bbox";
-import type { Bboxes, ExtractedFields } from "@/lib/types";
+import { FIELD_NAMES, type Bboxes, type ExtractedFields } from "@/lib/types";
 
 const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
 const DEFAULT_MODEL = "anthropic/claude-haiku-4.5";
@@ -63,6 +64,46 @@ export async function downscaleForModel(
     .jpeg({ quality: 90 })
     .toBuffer();
   return { bytes: new Uint8Array(resized), mimeType: "image/jpeg" };
+}
+
+const OCR_TIMEOUT_MS = 12_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(fallback), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timer);
+        resolve(fallback);
+      },
+    );
+  });
+}
+
+// Resolve a box for each field, preferring deterministic OCR geometry and
+// falling back to the model's own (width-trimmed) box where OCR cannot locate
+// the text. OCR is time-boxed so a slow cold start never blocks the response.
+async function resolveBboxes(
+  bytes: Uint8Array,
+  parsed: ExtractedFields,
+): Promise<Bboxes | null> {
+  const modelBoxes: Bboxes = parsed.bboxes
+    ? await tightenBboxes(bytes, parsed.bboxes)
+    : {};
+  const ocr = await withTimeout(ocrBboxes(bytes, parsed), OCR_TIMEOUT_MS, {});
+
+  const merged: Bboxes = {};
+  let located = false;
+  for (const field of FIELD_NAMES) {
+    const box = ocr[field] ?? modelBoxes[field] ?? parsed.bboxes?.[field] ?? null;
+    merged[field] = box;
+    if (box) located = true;
+  }
+  return located ? merged : (parsed.bboxes ?? null);
 }
 
 function mockExtraction(scenario: ExtractionOptions["scenario"]) {
@@ -154,10 +195,7 @@ export async function extractLabelFields(
     const parsed = extractedFieldsSchema.parse(
       JSON.parse(toolCall.function.arguments),
     );
-    if (!parsed.bboxes) return parsed;
-    // Deterministically trim each box to its inked text so the geometry no
-    // longer relies on the model's pixel precision.
-    const bboxes = await tightenBboxes(processedBytes, parsed.bboxes as Bboxes);
+    const bboxes = await resolveBboxes(processedBytes, parsed);
     return { ...parsed, bboxes };
   } catch (error) {
     if (error instanceof ExtractionProviderError) throw error;
