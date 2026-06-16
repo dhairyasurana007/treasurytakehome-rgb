@@ -1,7 +1,11 @@
 import sharp from "sharp";
 import OpenAI from "openai";
 
-import { EXTRACTION_TOOL, extractedFieldsSchema } from "@/lib/extraction-schema";
+import {
+  EXTRACTION_TOOL,
+  EXTRACTION_TOOL_WITH_BBOXES,
+  extractedFieldsSchema,
+} from "@/lib/extraction-schema";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
 import {
   matchFieldBox,
@@ -75,6 +79,11 @@ export async function downscaleForModel(
 }
 
 const OCR_TIMEOUT_MS = 12_000;
+
+const BASE_SYSTEM_PROMPT =
+  "Extract only text and visual evidence visibly present on this alcohol label. Preserve exact wording and capitalization. Use null when a field or visual property cannot be determined.";
+const BBOX_SYSTEM_PROMPT =
+  " For each text field you locate, also provide its bounding box as fractions of image width and height (x, y, w, h in range 0–1, where x/y is the top-left corner). Fit each box tightly to the inked glyphs of that field's value only. The left edge must sit at the leftmost visible pixel of the first character and the right edge at the rightmost visible pixel of the last character — exclude all leading and trailing whitespace, padding, and any blank area that runs to the edge of the line or column. Do not extend a box to cover the full width of the line, the column, or neighbouring text; bound only this field's own characters. The height must wrap only the lines of this field's text. Only supply a bbox when you can locate the text with high confidence.";
 
 function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return new Promise((resolve) => {
@@ -174,6 +183,10 @@ export async function extractLabelFields(
   const ocrPromise = includeBboxes
     ? withTimeout(recognizeWords(processedBytes), OCR_TIMEOUT_MS, null)
     : Promise.resolve(null);
+  const tool = includeBboxes ? EXTRACTION_TOOL_WITH_BBOXES : EXTRACTION_TOOL;
+  const systemPrompt = includeBboxes
+    ? BASE_SYSTEM_PROMPT + BBOX_SYSTEM_PROMPT
+    : BASE_SYSTEM_PROMPT;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EXTRACTION_TIMEOUT_MS);
 
@@ -184,8 +197,7 @@ export async function extractLabelFields(
         messages: [
           {
             role: "system",
-            content:
-              "Extract only text and visual evidence visibly present on this alcohol label. Preserve exact wording and capitalization. Use null when a field or visual property cannot be determined. For each text field you locate, also provide its bounding box as fractions of image width and height (x, y, w, h in range 0–1, where x/y is the top-left corner). Fit each box tightly to the inked glyphs of that field's value only. The left edge must sit at the leftmost visible pixel of the first character and the right edge at the rightmost visible pixel of the last character — exclude all leading and trailing whitespace, padding, and any blank area that runs to the edge of the line or column. Do not extend a box to cover the full width of the line, the column, or neighbouring text; bound only this field's own characters. The height must wrap only the lines of this field's text. Only supply a bbox when you can locate the text with high confidence.",
+            content: systemPrompt,
           },
           {
             role: "user",
@@ -203,10 +215,10 @@ export async function extractLabelFields(
             ],
           },
         ],
-        tools: [EXTRACTION_TOOL],
+        tools: [tool],
         tool_choice: {
           type: "function",
-          function: { name: EXTRACTION_TOOL.function.name },
+          function: { name: tool.function.name },
         },
         temperature: 0,
       },
