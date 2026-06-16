@@ -30,6 +30,10 @@ export class ExtractionProviderError extends Error {
 interface ExtractionOptions {
   mimeType: string;
   scenario?: "success" | "error" | "malformed";
+  // Bounding boxes require an extra OCR pass; opt in only when the caller will
+  // display them. Defaults off so the batch path (which never uses them) and
+  // box-free single checks stay fast.
+  includeBboxes?: boolean;
 }
 
 const MOCK_EXTRACTION: ExtractedFields = {
@@ -155,10 +159,11 @@ function createClient() {
 
 export async function extractLabelFields(
   bytes: Uint8Array,
-  { mimeType, scenario = "success" }: ExtractionOptions,
+  { mimeType, scenario = "success", includeBboxes = false }: ExtractionOptions,
 ): Promise<ExtractedFields> {
   if (process.env.EXTRACTION_MODE === "mock" && process.env.NODE_ENV !== "production") {
-    return mockExtraction(scenario);
+    const mock = mockExtraction(scenario);
+    return includeBboxes ? mock : { ...mock, bboxes: null };
   }
 
   const client = createClient();
@@ -166,11 +171,9 @@ export async function extractLabelFields(
   // Start OCR now so it runs concurrently with the vision request; it usually
   // finishes within that window and adds little wall-clock. Time-boxed and
   // null-safe so a slow cold start can never block or break the response.
-  const ocrPromise = withTimeout(
-    recognizeWords(processedBytes),
-    OCR_TIMEOUT_MS,
-    null,
-  );
+  const ocrPromise = includeBboxes
+    ? withTimeout(recognizeWords(processedBytes), OCR_TIMEOUT_MS, null)
+    : Promise.resolve(null);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), EXTRACTION_TIMEOUT_MS);
 
@@ -219,6 +222,7 @@ export async function extractLabelFields(
     const parsed = extractedFieldsSchema.parse(
       JSON.parse(toolCall.function.arguments),
     );
+    if (!includeBboxes) return { ...parsed, bboxes: null };
     const ocr = await ocrPromise;
     const bboxes = await resolveBboxes(processedBytes, parsed, ocr);
     return { ...parsed, bboxes };

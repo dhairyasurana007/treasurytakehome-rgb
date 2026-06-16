@@ -30,9 +30,11 @@ export async function POST(request: Request) {
       (requestedScenario === "error" || requestedScenario === "malformed")
         ? requestedScenario
         : "success";
+    const includeBboxes = formData.get("includeBboxes") === "true";
     const extracted = await extractLabelFields(validatedImage.bytes, {
       mimeType: validatedImage.mimeType,
       scenario,
+      includeBboxes,
     });
 
     const result = compareFields(extracted, application);

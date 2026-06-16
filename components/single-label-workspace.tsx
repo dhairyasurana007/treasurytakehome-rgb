@@ -66,6 +66,7 @@ function fieldLabel(field: FieldName) {
 export default function SingleLabelWorkspace() {
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showBboxes, setShowBboxes] = useState(false);
   const [beverageType, setBeverageType] =
     useState<ApplicationData["beverage_type"]>("distilled_spirits");
   const [values, setValues] = useState(INITIAL_VALUES);
@@ -184,6 +185,7 @@ export default function SingleLabelWorkspace() {
         applicability,
       } satisfies ApplicationData),
     );
+    form.set("includeBboxes", String(showBboxes));
 
     try {
       const response = await fetch("/api/verify", { method: "POST", body: form });
@@ -218,6 +220,7 @@ export default function SingleLabelWorkspace() {
     setElapsedMs(null);
     setTimerLabel("");
     setActiveField(null);
+    setShowBboxes(false);
   }
 
   if (status === "results" && result) {
@@ -534,16 +537,38 @@ export default function SingleLabelWorkspace() {
 
       <div className="form-actions">
         <p>Your image is used only to complete this verification.</p>
-        <button
-          className="primary-button"
-          type="submit"
-          disabled={status === "submitting" || formIncomplete}
-          {...(status === "submitting" ? { "data-submitting": "" } : {})}
-        >
-          {status === "submitting"
-            ? `Analyzing label… ${timerLabel}`
-            : "Verify label"}
-        </button>
+        <div className="verify-controls">
+          <div className="verify-buttons">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={showBboxes}
+              className={`bbox-toggle${showBboxes ? " is-on" : ""}`}
+              onClick={() => setShowBboxes((value) => !value)}
+              disabled={status === "submitting"}
+            >
+              <span className="bbox-toggle-track" aria-hidden="true">
+                <span className="bbox-toggle-thumb" />
+              </span>
+              Show bounding boxes
+            </button>
+            <button
+              className="primary-button"
+              type="submit"
+              disabled={status === "submitting" || formIncomplete}
+              {...(status === "submitting" ? { "data-submitting": "" } : {})}
+            >
+              {status === "submitting"
+                ? `Analyzing label… ${timerLabel}`
+                : "Verify label"}
+            </button>
+          </div>
+          {showBboxes && (
+            <p className="bbox-latency-note" role="note">
+              Note: generating bounding boxes will take longer than 5s.
+            </p>
+          )}
+        </div>
       </div>
     </form>
   );
