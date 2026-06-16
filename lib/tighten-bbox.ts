@@ -2,11 +2,14 @@ import sharp from "sharp";
 
 import { FIELD_NAMES, type Bbox, type Bboxes } from "@/lib/types";
 
-// Deterministically shrink each model bounding box to the inked text it
-// surrounds by trimming uniform-colour margins (e.g. trailing whitespace or
-// blank area that runs to the line edge). The VLM still *locates* the field;
-// only the box edges are recomputed here, so the geometry no longer depends on
-// the model's spatial precision.
+// Deterministically tighten the *width* of each model bounding box by trimming
+// uniform-colour left/right margins (e.g. trailing whitespace or blank area
+// that runs to the line edge). The VLM still locates the field and sets its
+// vertical position and height; we only recompute the horizontal edges.
+//
+// Why horizontal-only: trimming vertically too would snap the box onto a
+// neighbouring line's ink whenever the model's loose box brushed it, moving the
+// box off its own text. Keeping the model's y/h preserves the correct line.
 //
 // Caveat: trimming keys off the box's corner colour as the background, so it
 // works best on text with reasonable contrast against a roughly uniform
@@ -59,14 +62,17 @@ async function tightenOne(
       .toBuffer({ resolveWithObject: true });
 
     const removedLeft = Math.abs(info.trimOffsetLeft ?? 0);
-    const removedTop = Math.abs(info.trimOffsetTop ?? 0);
     if (!info.width || !info.height) return box;
 
+    // Horizontal-only: keep the model's vertical position and height (already
+    // on the correct line) and recompute just the left/right edges. Trimming
+    // vertically too would snap the box onto a neighbouring line's ink when the
+    // model's box brushed it, moving the box off its text.
     return {
       x: (left + removedLeft) / width,
-      y: (top + removedTop) / height,
+      y: box.y,
       w: info.width / width,
-      h: info.height / height,
+      h: box.h,
     };
   } catch {
     // A fully uniform region (nothing to trim) or any sharp error throws here;

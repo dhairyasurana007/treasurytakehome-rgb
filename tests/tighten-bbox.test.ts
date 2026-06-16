@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 import { tightenBboxes } from "@/lib/tighten-bbox";
 
 // A white 200x100 canvas with a single black rectangle at x:50..120, y:30..60.
-// The tight box around the ink is therefore x=0.25, y=0.30, w=0.35, h=0.30.
+// Tightening is horizontal-only, so width snaps to the ink (x=0.25, w=0.35)
+// while the caller's vertical position and height are preserved.
 async function imageWithBlackRect() {
   const rect = await sharp({
     create: { width: 70, height: 30, channels: 3, background: "#000000" },
@@ -24,14 +25,16 @@ describe("tightenBboxes", () => {
   it("shrinks a loose box down to the inked text", async () => {
     const bytes = await imageWithBlackRect();
     const result = await tightenBboxes(bytes, {
-      brand_name: { x: 0, y: 0, w: 1, h: 1 },
+      brand_name: { x: 0, y: 0.2, w: 1, h: 0.5 },
     });
     const box = result.brand_name;
     expect(box).toBeTruthy();
+    // Width snaps to the ink...
     expect(box!.x).toBeCloseTo(0.25, 1);
-    expect(box!.y).toBeCloseTo(0.3, 1);
     expect(box!.w).toBeCloseTo(0.35, 1);
-    expect(box!.h).toBeCloseTo(0.3, 1);
+    // ...while the caller's vertical position and height are kept as-is.
+    expect(box!.y).toBeCloseTo(0.2, 5);
+    expect(box!.h).toBeCloseTo(0.5, 5);
   });
 
   it("leaves a fully blank region's box unchanged", async () => {
