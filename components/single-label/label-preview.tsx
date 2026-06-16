@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
@@ -34,11 +33,6 @@ export default function LabelPreview({
     left: number;
     top: number;
   } | null>(null);
-
-  // Reset zoom whenever the image changes (new upload, replacement, or clear).
-  useEffect(() => {
-    setZoom(1);
-  }, [previewUrl]);
 
   function beginPan(event: ReactPointerEvent<HTMLDivElement>) {
     const viewport = viewportRef.current;

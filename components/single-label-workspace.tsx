@@ -182,6 +182,7 @@ export default function SingleLabelWorkspace() {
           </div>
         </div>
         <LabelPreview
+          key={previewUrl ?? "no-image"}
           previewUrl={previewUrl}
           invalid={Boolean(errors.image)}
           onSelect={handleSelect}
