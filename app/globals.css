@@ -1368,6 +1368,13 @@ a:focus-visible {
   font-weight: 600;
 }
 
+.bbox-experimental-note {
+  margin: 0;
+  color: var(--ink-soft, #5a6172);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
 .label-preview-section {
   padding: 28px clamp(24px, 5vw, 56px);
   border-top: 1px solid var(--line);

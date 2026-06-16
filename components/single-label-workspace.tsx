@@ -568,6 +568,9 @@ export default function SingleLabelWorkspace() {
               Note: generating bounding boxes will take longer than 5s.
             </p>
           )}
+          <p className="bbox-experimental-note">
+            The bounding boxes feature is currently experimental.
+          </p>
         </div>
       </div>
     </form>
