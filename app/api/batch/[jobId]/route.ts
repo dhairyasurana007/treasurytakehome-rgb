@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getBatchStore } from "@/lib/batch-store";
-import { runBatchWorker } from "@/lib/runtime";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { runBatchWorker } from "@/lib/batch/runtime";
 
 export async function GET(
   _request: Request,

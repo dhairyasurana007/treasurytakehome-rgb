@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch-fixtures";
-import { getBatchStore } from "@/lib/batch-store";
-import { BatchWorker } from "@/lib/batch-worker";
+import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch/batch-fixtures";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { BatchWorker } from "@/lib/batch/batch-worker";
 
 export async function POST() {
   if (process.env.ENABLE_TEST_HARNESS !== "true") {

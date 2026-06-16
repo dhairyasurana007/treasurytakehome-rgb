@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { getBatchStore } from "@/lib/batch-store";
+import { getBatchStore } from "@/lib/batch/batch-store";
 
 export const dynamic = "force-dynamic";
 

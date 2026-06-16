@@ -1,5 +1,5 @@
-import type { BatchJobView, ClaimedBatchItem } from "@/lib/batch-types";
-import type { BatchStore } from "@/lib/batch-store";
+import type { BatchJobView, ClaimedBatchItem } from "@/lib/batch/batch-types";
+import type { BatchStore } from "@/lib/batch/batch-store";
 import type { VerificationResult } from "@/lib/types";
 
 export type BatchProcessor = (

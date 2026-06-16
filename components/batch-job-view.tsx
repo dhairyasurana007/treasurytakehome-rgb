@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { BatchJobView } from "@/lib/batch-types";
+import type { BatchJobView } from "@/lib/batch/batch-types";
 
 const RECENT_JOBS_KEY = "ttb-recent-batch-jobs";
 

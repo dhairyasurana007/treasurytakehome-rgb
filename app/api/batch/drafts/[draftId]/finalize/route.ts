@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getBatchStore } from "@/lib/batch-store";
-import { finalizeDraft } from "@/lib/draft-service";
-import { runBatchWorker } from "@/lib/runtime";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { finalizeDraft } from "@/lib/batch/draft-service";
+import { runBatchWorker } from "@/lib/batch/runtime";
 import { ValidationError } from "@/lib/validation-error";
 
 export async function POST(

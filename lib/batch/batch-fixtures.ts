@@ -1,6 +1,6 @@
 import { compareFields } from "@/lib/compare";
 import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
-import type { NewBatchItem } from "@/lib/batch-types";
+import type { NewBatchItem } from "@/lib/batch/batch-types";
 import type { ExtractedFields } from "@/lib/types";
 
 export const FIXTURE_ITEMS: NewBatchItem[] = ["label-a.png", "label-b.png"].map(

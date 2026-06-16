@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { FIXTURE_ITEMS } from "@/lib/batch-fixtures";
-import { getBatchStore } from "@/lib/batch-store";
+import { FIXTURE_ITEMS } from "@/lib/batch/batch-fixtures";
+import { getBatchStore } from "@/lib/batch/batch-store";
 
 function disabled() {
   return process.env.ENABLE_TEST_HARNESS !== "true";

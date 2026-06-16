@@ -1,10 +1,10 @@
 import fs from "node:fs";
 
-import { getBatchStore } from "@/lib/batch-store";
+import { getBatchStore } from "@/lib/batch/batch-store";
 import {
   BatchProcessingError,
   BatchWorker,
-} from "@/lib/batch-worker";
+} from "@/lib/batch/batch-worker";
 import { compareFields } from "@/lib/compare";
 import {
   extractLabelFields,

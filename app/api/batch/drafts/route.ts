@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getBatchStore } from "@/lib/batch-store";
-import { ensureBatchRuntimeStarted } from "@/lib/runtime";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { ensureBatchRuntimeStarted } from "@/lib/batch/runtime";
 
 export function POST() {
   ensureBatchRuntimeStarted();

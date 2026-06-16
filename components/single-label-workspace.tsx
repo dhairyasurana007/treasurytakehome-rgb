@@ -1,86 +1,19 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+
+import LabelPreview from "@/components/single-label/label-preview";
+import ResultsPanel from "@/components/single-label/results-panel";
 import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
-
-import { CANONICAL_GOVERNMENT_WARNING } from "@/lib/government-warning";
-import type {
-  ApplicationData,
-  Bbox,
-  ConditionalFieldName,
-  FieldName,
-  VerificationResult,
-} from "@/lib/types";
-
-const FIELD_CONFIG: Array<{
-  key: ConditionalFieldName;
-  label: string;
-  placeholder: string;
-}> = [
-  { key: "brand_name", label: "Brand name", placeholder: "e.g. OLD TOM DISTILLERY" },
-  {
-    key: "class_type",
-    label: "Class or type",
-    placeholder: "e.g. Kentucky Straight Bourbon Whiskey",
-  },
-  { key: "abv", label: "Alcohol content", placeholder: "e.g. 45% Alc./Vol." },
-  { key: "net_contents", label: "Net contents", placeholder: "e.g. 750 mL" },
-  {
-    key: "bottler",
-    label: "Bottler or producer name and address",
-    placeholder: "e.g. Old Tom Distillery, Louisville, KY",
-  },
-  {
-    key: "country",
-    label: "Country of origin",
-    placeholder: "e.g. United States",
-  },
-];
-
-const INITIAL_VALUES: ApplicationData["values"] = {
-  brand_name: "",
-  class_type: "",
-  abv: "",
-  net_contents: "",
-  bottler: "",
-  country: "",
-  government_warning: CANONICAL_GOVERNMENT_WARNING,
-};
-
-const INITIAL_APPLICABILITY: ApplicationData["applicability"] = {
-  brand_name: true,
-  class_type: true,
-  abv: true,
-  net_contents: true,
-  bottler: true,
-  country: true,
-  government_warning: true,
-};
-
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
-const ZOOM_STEP = 0.5;
-const clampZoom = (value: number) =>
-  Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round(value * 100) / 100));
-
-function fieldLabel(field: FieldName) {
-  return (
-    FIELD_CONFIG.find((item) => item.key === field)?.label ??
-    "Government warning"
-  );
-}
+  FIELD_CONFIG,
+  INITIAL_APPLICABILITY,
+  INITIAL_VALUES,
+} from "@/components/single-label/fields";
+import type { ApplicationData, VerificationResult } from "@/lib/types";
 
 export default function SingleLabelWorkspace() {
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [isPanning, setIsPanning] = useState(false);
   const [showBboxes, setShowBboxes] = useState(false);
   const [beverageType, setBeverageType] =
     useState<ApplicationData["beverage_type"]>("distilled_spirits");
@@ -95,66 +28,6 @@ export default function SingleLabelWorkspace() {
   const startTimeRef = useRef<number | null>(null);
   const [elapsedMs, setElapsedMs] = useState<number | null>(null);
   const [timerLabel, setTimerLabel] = useState("");
-  const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const panRef = useRef<{
-    x: number;
-    y: number;
-    left: number;
-    top: number;
-  } | null>(null);
-
-  function beginPan(event: ReactPointerEvent<HTMLDivElement>) {
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-    panRef.current = {
-      x: event.clientX,
-      y: event.clientY,
-      left: viewport.scrollLeft,
-      top: viewport.scrollTop,
-    };
-    setIsPanning(true);
-    viewport.setPointerCapture(event.pointerId);
-  }
-
-  function movePan(event: ReactPointerEvent<HTMLDivElement>) {
-    const viewport = viewportRef.current;
-    const start = panRef.current;
-    if (!viewport || !start) return;
-    viewport.scrollLeft = start.left - (event.clientX - start.x);
-    viewport.scrollTop = start.top - (event.clientY - start.y);
-  }
-
-  function endPan(event: ReactPointerEvent<HTMLDivElement>) {
-    const viewport = viewportRef.current;
-    panRef.current = null;
-    setIsPanning(false);
-    if (viewport?.hasPointerCapture(event.pointerId)) {
-      viewport.releasePointerCapture(event.pointerId);
-    }
-  }
-  const [activeField, setActiveField] = useState<FieldName | null>(null);
-  const cardRefs = useRef<Partial<Record<FieldName, HTMLElement | null>>>({});
-  const boxRefs = useRef<Partial<Record<FieldName, HTMLButtonElement | null>>>(
-    {},
-  );
-
-  function revealCard(field: FieldName) {
-    setActiveField(field);
-    cardRefs.current[field]?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }
-
-  function revealBox(field: FieldName) {
-    setActiveField(field);
-    boxRefs.current[field]?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
-  }
 
   useEffect(() => {
     return () => {
@@ -184,10 +57,6 @@ export default function SingleLabelWorkspace() {
     return () => clearInterval(id);
   }, [status]);
 
-  useEffect(() => {
-    if (status === "results") resultsHeadingRef.current?.focus();
-  }, [status]);
-
   const applicableCount = useMemo(
     () =>
       FIELD_CONFIG.filter((field) => applicability[field.key]).length + 1,
@@ -201,6 +70,12 @@ export default function SingleLabelWorkspace() {
       (field) => applicability[field.key] && !values[field.key].trim(),
     );
   }, [image, values, applicability]);
+
+  function handleSelect(file: File) {
+    setImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    setErrors((current) => ({ ...current, image: "" }));
+  }
 
   function validate() {
     const nextErrors: Record<string, string> = {};
@@ -262,7 +137,6 @@ export default function SingleLabelWorkspace() {
   function reset() {
     setImage(null);
     setPreviewUrl(null);
-    setZoom(1);
     setBeverageType("distilled_spirits");
     setValues(INITIAL_VALUES);
     setApplicability(INITIAL_APPLICABILITY);
@@ -273,137 +147,18 @@ export default function SingleLabelWorkspace() {
     startTimeRef.current = null;
     setElapsedMs(null);
     setTimerLabel("");
-    setActiveField(null);
     setShowBboxes(false);
-    setIsPanning(false);
   }
 
   if (status === "results" && result) {
-    const bboxEntries = result.bboxes
-      ? (
-          Object.entries(result.bboxes) as [FieldName, Bbox | null | undefined][]
-        ).filter(
-          (entry): entry is [FieldName, Bbox] =>
-            entry[1] != null &&
-            result.fields[entry[0]]?.verdict !== "not-applicable",
-        )
-      : [];
-    const bboxFields = new Set(bboxEntries.map(([field]) => field));
     return (
-      <section className="results-panel" aria-labelledby="results-heading">
-        <div className="results-heading-row">
-          <div>
-            <p className="section-label">Verification complete</p>
-            <h2 id="results-heading" ref={resultsHeadingRef} tabIndex={-1}>Review the label results</h2>
-            <p>
-              {applicableCount} applicable fields checked. Confirm anything
-              marked for review before continuing.
-              {elapsedMs !== null && (
-                <> Analysis completed in <strong>{(elapsedMs / 1000).toFixed(1)}s</strong>.</>
-              )}
-            </p>
-          </div>
-          <span className={`overall-badge verdict-${result.overall_status}`}>
-            Overall: {result.overall_status.replace("-", " ")}
-          </span>
-        </div>
-        {previewUrl && bboxEntries.length > 0 && (
-          <div className="label-preview-section">
-            <p className="label-preview-hint">
-              Select a highlighted area to jump to its field below.
-            </p>
-            <div className="label-preview-container">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={previewUrl} alt="Label with annotated field locations" className="label-preview-image" />
-              {bboxEntries.map(([field, bbox]) => {
-                const verdict = result.fields[field]?.verdict ?? "not-applicable";
-                return (
-                  <button
-                    type="button"
-                    key={field}
-                    ref={(el) => {
-                      boxRefs.current[field] = el;
-                    }}
-                    className={`bbox-box verdict-${verdict}${activeField === field ? " is-active" : ""}`}
-                    style={{
-                      left: `${bbox.x * 100}%`,
-                      top: `${bbox.y * 100}%`,
-                      width: `${bbox.w * 100}%`,
-                      height: `${bbox.h * 100}%`,
-                    }}
-                    onClick={() => revealCard(field)}
-                    aria-label={`${fieldLabel(field)} on label — jump to its field details`}
-                  >
-                    <span className="bbox-box-label">{fieldLabel(field)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {(
-          [
-            { verdict: "mismatch", label: "Mismatches" },
-            { verdict: "needs-review", label: "Needs review" },
-            { verdict: "match", label: "Matches" },
-            { verdict: "not-applicable", label: "Not applicable" },
-          ] as const
-        ).map(({ verdict, label }) => {
-          const fields = Object.values(result.fields).filter(
-            (f) => f.verdict === verdict,
-          );
-          if (fields.length === 0) return null;
-          return (
-            <div key={verdict} className="results-group">
-              <h3 className={`results-group-heading verdict-label-${verdict}`}>
-                {label}
-              </h3>
-              <div className="results-grid">
-                {fields.map((field) => (
-                  <article
-                    className={`result-card verdict-${field.verdict}${activeField === field.field ? " is-active" : ""}`}
-                    data-testid={`result-${field.field}`}
-                    key={field.field}
-                    ref={(el) => {
-                      cardRefs.current[field.field] = el;
-                    }}
-                  >
-                    <div className="result-card-heading">
-                      <h3>{fieldLabel(field.field)}</h3>
-                      <span>{field.verdict.replace("-", " ")}</span>
-                    </div>
-                    <p>{field.reason}</p>
-                    {bboxFields.has(field.field) && (
-                      <button
-                        type="button"
-                        className="bbox-jump-link"
-                        onClick={() => revealBox(field.field)}
-                      >
-                        Show on label
-                      </button>
-                    )}
-                    {field.verdict !== "not-applicable" && (
-                      <dl>
-                        <div>
-                          <dt>On label</dt>
-                          <dd>{field.extracted || "Not found"}</dd>
-                        </div>
-                        <div>
-                          <dt>In application</dt>
-                          <dd>{field.submitted || "Not provided"}</dd>
-                        </div>
-                      </dl>
-                    )}
-                  </article>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-        <button className="primary-button" type="button" onClick={reset}>
-          Verify another label
-        </button>
-      </section>
+      <ResultsPanel
+        result={result}
+        previewUrl={previewUrl}
+        applicableCount={applicableCount}
+        elapsedMs={elapsedMs}
+        onReset={reset}
+      />
     );
   }
 
@@ -426,109 +181,11 @@ export default function SingleLabelWorkspace() {
             <p>JPEG, PNG, or WebP. Maximum 5 MB and 25 megapixels.</p>
           </div>
         </div>
-        <input
-          ref={fileInputRef}
-          id="label-image"
-          name="label-image"
-          type="file"
-          accept=".jpg,.jpeg,.png,.webp"
-          className="hidden-file-input"
-          onChange={(event) => {
-            const selected = event.target.files?.[0] ?? null;
-            setImage(selected);
-            setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
-            setZoom(1);
-            setErrors((current) => ({ ...current, image: "" }));
-          }}
+        <LabelPreview
+          previewUrl={previewUrl}
+          invalid={Boolean(errors.image)}
+          onSelect={handleSelect}
         />
-        {previewUrl ? (
-          <div className="preview-shell">
-            <div
-              ref={viewportRef}
-              className={`preview-viewport${isPanning ? " is-panning" : ""}`}
-              onPointerDown={beginPan}
-              onPointerMove={movePan}
-              onPointerUp={endPan}
-              onPointerLeave={endPan}
-            >
-              {/* A blob URL is generated from a user-selected local file. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt="Selected label preview"
-                className="preview-image"
-                draggable={false}
-                style={{ height: `${zoom * 100}%` }}
-              />
-            </div>
-            <div className="preview-controls">
-              <div
-                className="zoom-controls"
-                role="group"
-                aria-label="Zoom label preview"
-              >
-                <button
-                  type="button"
-                  className="zoom-button"
-                  onClick={() => setZoom((value) => clampZoom(value - ZOOM_STEP))}
-                  disabled={zoom <= MIN_ZOOM}
-                  aria-label="Zoom out"
-                >
-                  −
-                </button>
-                <span className="zoom-level" aria-live="polite">
-                  {Math.round(zoom * 100)}%
-                </span>
-                <button
-                  type="button"
-                  className="zoom-button"
-                  onClick={() => setZoom((value) => clampZoom(value + ZOOM_STEP))}
-                  disabled={zoom >= MAX_ZOOM}
-                  aria-label="Zoom in"
-                >
-                  +
-                </button>
-                <button
-                  type="button"
-                  className="zoom-reset"
-                  onClick={() => setZoom(1)}
-                  disabled={zoom === 1}
-                >
-                  Reset
-                </button>
-              </div>
-              <button
-                type="button"
-                className="replace-button"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Upload a different label image
-              </button>
-            </div>
-          </div>
-        ) : (
-          <label
-            className={`upload-zone ${errors.image ? "field-invalid" : ""}`}
-            htmlFor="label-image"
-            onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            onDrop={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const file = e.dataTransfer.files[0] ?? null;
-              if (!file) return;
-              setImage(file);
-              setPreviewUrl(URL.createObjectURL(file));
-              setZoom(1);
-              setErrors((current) => ({ ...current, image: "" }));
-            }}
-          >
-            <div>
-              <strong>Choose label artwork</strong>
-              <span>Click here or drop a file into this area</span>
-            </div>
-          </label>
-        )}
         {errors.image && <p className="field-error">{errors.image}</p>}
       </section>
 

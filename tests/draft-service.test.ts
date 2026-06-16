@@ -4,12 +4,12 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { BatchStore } from "@/lib/batch-store";
+import { BatchStore } from "@/lib/batch/batch-store";
 import {
   finalizeDraft,
   storeDraftImage,
   storeDraftManifest,
-} from "@/lib/draft-service";
+} from "@/lib/batch/draft-service";
 
 const PNG_1X1 = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",

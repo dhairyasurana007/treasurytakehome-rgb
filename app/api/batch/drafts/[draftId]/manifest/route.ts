@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getBatchStore } from "@/lib/batch-store";
-import { storeDraftManifest } from "@/lib/draft-service";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { storeDraftManifest } from "@/lib/batch/draft-service";
 import { ValidationError } from "@/lib/validation-error";
 
 export async function POST(

@@ -4,8 +4,8 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { FIXTURE_ITEMS } from "@/lib/batch-fixtures";
-import { BatchStore } from "@/lib/batch-store";
+import { FIXTURE_ITEMS } from "@/lib/batch/batch-fixtures";
+import { BatchStore } from "@/lib/batch/batch-store";
 
 let directory: string;
 let store: BatchStore;

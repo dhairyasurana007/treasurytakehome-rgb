@@ -4,16 +4,16 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch-fixtures";
-import { BatchStore } from "@/lib/batch-store";
-import { BatchWorker } from "@/lib/batch-worker";
+import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch/batch-fixtures";
+import { BatchStore } from "@/lib/batch/batch-store";
+import { BatchWorker } from "@/lib/batch/batch-worker";
 import {
   buildExportCsv,
   csvCell,
   csvRow,
   isPartialExport,
   safeValue,
-} from "@/lib/export";
+} from "@/lib/batch/export";
 import { FIELD_NAMES } from "@/lib/types";
 
 let directory: string;

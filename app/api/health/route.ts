@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ensureBatchRuntimeStarted } from "@/lib/runtime";
+import { ensureBatchRuntimeStarted } from "@/lib/batch/runtime";
 
 export function GET() {
   ensureBatchRuntimeStarted();

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch-fixtures";
-import { getBatchStore } from "@/lib/batch-store";
-import { BatchProcessingError, BatchWorker } from "@/lib/batch-worker";
+import { FIXTURE_ITEMS, fixtureResult } from "@/lib/batch/batch-fixtures";
+import { getBatchStore } from "@/lib/batch/batch-store";
+import { BatchProcessingError, BatchWorker } from "@/lib/batch/batch-worker";
 
 type Scenario = "transient" | "rate-limit" | "permanent" | "manual";
 

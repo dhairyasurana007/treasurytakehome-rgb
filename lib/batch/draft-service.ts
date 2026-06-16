@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-import type { BatchStore } from "@/lib/batch-store";
-import { normalizeBasename, parseBatchCsv } from "@/lib/csv";
+import type { BatchStore } from "@/lib/batch/batch-store";
+import { normalizeBasename, parseBatchCsv } from "@/lib/batch/csv";
 import { validateImageBytes, validateImageFile } from "@/lib/image-validation";
 import { ValidationError } from "@/lib/validation-error";
 

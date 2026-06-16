@@ -12,7 +12,7 @@ test("shows every deterministic comparison verdict", async ({ page }) => {
   await expect(page.getByTestId("verdict-not-applicable")).toHaveCount(1);
   await expect(
     page.getByText(
-      "Extracted: STONE'S THROW | Submitted: Stone's Throw",
+      "Extracted: Stone's Throw Reserve | Submitted: Stone's Throw",
       { exact: true },
     ),
   ).toBeVisible();

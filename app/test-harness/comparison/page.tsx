@@ -29,7 +29,9 @@ const application: ApplicationData = {
 };
 
 const extracted: ExtractedFields = {
-  brand_name: "STONE'S THROW",
+  // Near-match (extra word) so it still resolves to "needs-review" now that a
+  // case-only difference counts as a match.
+  brand_name: "Stone's Throw Reserve",
   class_type: "Kentucky Straight Bourbon Whiskey",
   abv: "46%",
   net_contents: "750ml",

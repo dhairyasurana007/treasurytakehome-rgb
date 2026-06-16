@@ -19,10 +19,10 @@ describe("batch runtime", () => {
       recoverInterruptedItems: vi.fn(),
       cleanupExpired: vi.fn(),
     };
-    vi.doMock("@/lib/batch-store", () => ({
+    vi.doMock("@/lib/batch/batch-store", () => ({
       getBatchStore: () => store,
     }));
-    const { ensureBatchRuntimeStarted } = await import("@/lib/runtime");
+    const { ensureBatchRuntimeStarted } = await import("@/lib/batch/runtime");
 
     ensureBatchRuntimeStarted();
     expect(store.recoverInterruptedItems).toHaveBeenCalledOnce();

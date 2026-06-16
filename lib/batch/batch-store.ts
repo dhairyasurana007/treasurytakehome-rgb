@@ -10,8 +10,8 @@ import type {
   BatchJobView,
   ClaimedBatchItem,
   NewBatchItem,
-} from "@/lib/batch-types";
-import type { BatchManifestRow } from "@/lib/csv";
+} from "@/lib/batch/batch-types";
+import type { BatchManifestRow } from "@/lib/batch/csv";
 import type { ApplicationData, VerificationResult } from "@/lib/types";
 
 interface ItemRow {
