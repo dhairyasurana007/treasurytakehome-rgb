@@ -1201,7 +1201,7 @@ a:focus-visible {
 
 .applicability-control {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   color: var(--muted);
   font-size: 0.875rem;
@@ -1211,6 +1211,8 @@ a:focus-visible {
 .applicability-control input {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
+  margin: 0;
 }
 
 .field-group > input,
