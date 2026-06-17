@@ -730,6 +730,7 @@ a:focus-visible {
   border-radius: 4px;
   background: #fafbfc;
   padding: 20px;
+  cursor: pointer;
 }
 
 .batch-file-field > span {
@@ -738,6 +739,7 @@ a:focus-visible {
 
 .batch-file-field input {
   min-height: 44px;
+  cursor: pointer;
 }
 
 .batch-file-field small,
